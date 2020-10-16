@@ -80,25 +80,31 @@ const controller = {
     },
     getGoodsDetail: async function(req, res){
         let { g_id } = req.query;
-        if(!g_id){
-            res.json({satus: failStatus, message: "缺少g_id"});
-            return;
-        }
-        let sql = `select * from goods where id = ${g_id}`;
-        let data = [];
-        try {
-            data = await query(sql);
-        }catch(error){
-            res.json({satus: failStatus, message: error});
-        }
-        let message = data.length === 0 ?"商品不存在":"";
-        
-        let resData = {
-            status: succStatus,
-            message: message,
-            data:data[0]
-        }
-        res.json(resData);
+		if(!g_id || !parseInt(g_id)){
+			let message = !g_id ?"缺少g_id" :"输入正确的g_id";
+			res.json({satus: failStatus, message});
+			return;
+		}
+		let sql = `select * from goods where id = ${g_id}`;
+		let sql2 = `select * from images where goods_id = ${g_id}`;
+		let queryArr = [query(sql), query(sql2)];
+		let data = [];
+		try {
+			data = await Promise.all(queryArr);
+		}catch(error){
+			res.json({satus: failStatus, message: error});
+		}
+		
+		if(data[0].length === 0){
+			res.json({satus: failStatus, message: "商品不存在"});
+			return;
+		}
+		data[0][0].images = data[1];
+		let resData = {
+			status: succStatus,
+			data:data[0][0]
+		}
+		res.json(resData);
     },
     getHotGoods: async function(req, res){
         let sql = 'select * from goods order by total_sold_num desc limit 20';

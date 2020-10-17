@@ -107,7 +107,9 @@ const controller = {
 		res.json(resData);
     },
     getHotGoods: async function(req, res){
-        let sql = 'select * from goods order by total_sold_num desc limit 20';
+		let { pageSize } = req.query;
+		pageSize = pageSize ?pageSize :10;
+        let sql = `select * from goods order by total_sold_num desc limit ${ pageSize }`;
         let data = await query(sql);
         let resData = {
             status: succStatus,

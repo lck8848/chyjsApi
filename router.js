@@ -8,7 +8,7 @@ route.get('/api/getSearchResult', controller.getSearchResult);
 //获取礼物
 route.get('/api/getGift', controller.getGift);
 
-//首页八宫格获取具体分类
+//获取具体分类
 route.get('/api/getClassify', controller.getClassify);
 
 //根据classify的alias_code获取分类商品

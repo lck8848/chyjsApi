@@ -32,4 +32,7 @@ route.get('/api/getOrderList', controller.getOrderList);
 //地址列表
 route.get('/api/getAddress', controller.getAddress);
 
+//地址列表
+route.post('/api/getAdmin', controller.getAdmin);
+
 module.exports = route;

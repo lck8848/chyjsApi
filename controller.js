@@ -178,13 +178,13 @@ const controller = {
         res.json(resData);
     },
     getAdmin: async function(req, res){
-        let { username,password } = req.param;
-		console.log(username,password)
+		console.log(req.body)
+        let { username,password } = req.body;
         if(!username || !password){
             res.json({satus: failStatus, message: "缺少username/password"});
             return;
         }
-        let sql = `select * from admin where username = ${username} and password = ${password}`;
+        let sql = `select * from admin where username = '${username}' and password = '${password}'`;
         let data = await query(sql);
 
         let resData = {

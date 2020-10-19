@@ -35,4 +35,13 @@ route.get('/api/getAddress', controller.getAddress);
 //地址列表
 route.post('/api/getAdmin', controller.getAdmin);
 
+//模拟后台模板数据
+route.get('/api/user/info', controller.userInfo);
+
+//模拟后台退出模板数据
+route.post('/api/user/logout', controller.userLogout);
+
+//模拟后台登录模板数据
+route.post('/api/user/login', controller.userLogin);
+
 module.exports = route;

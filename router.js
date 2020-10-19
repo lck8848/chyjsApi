@@ -29,6 +29,18 @@ route.get('/api/getNoteDetail', controller.getNoteDetail);
 //订单列表
 route.get('/api/getOrderList', controller.getOrderList);
 
+//订单列表
+route.post('/api/getOrderListByStatus', controller.getOrderListByStatus);
+
+//订单
+route.post('/api/getOrder', controller.getOrder);
+
+//删除订单 
+route.post('/api/delOrder', controller.delOrder);
+
+//添加订单 
+route.post('/api/addOrder', controller.addOrder);
+
 //地址列表
 route.get('/api/getAddress', controller.getAddress);
 

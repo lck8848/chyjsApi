@@ -193,11 +193,131 @@ const controller = {
     getOrderList: async function (req, res) {
         let sql = 'select * from `order`';
         let data = await query(sql);
-
+        // console.log(data)
+        data.map(v => {
+            v.status == 1 && (v.status = "待付款");
+            v.status == 2 && (v.status = "待收货");
+            v.status == 3 && (v.status = "待发货");
+            v.status == 4 && (v.status = "退款/售后");
+            v.status == 5 && (v.status = "取消订单");
+        })
         let resData = {
+            code: 20000,
             status: succStatus,
-            data: data
+            data: {
+                total: data.length,
+                items: data
+            }
         }
+        res.json(resData);
+    },
+    getOrderListByStatus: async function (req, res) {
+        let {
+            status
+        } = req.body;
+        console.log(status);
+        let sql;
+        if (status != "") {
+            sql = 'select * from `order` where status = ' + status;
+        }else{
+            sql = 'select * from `order`';
+        }
+            let data = await query(sql);
+            // console.log(data)
+            data.map(v => {
+                v.status == 1 && (v.status = "待付款");
+                v.status == 2 && (v.status = "待收货");
+                v.status == 3 && (v.status = "待发货");
+                v.status == 4 && (v.status = "退款/售后");
+                v.status == 5 && (v.status = "取消订单");
+            })
+            let resData = {
+                code: 20000,
+                status: succStatus,
+                data: {
+                    total: data.length,
+                    items: data
+                }
+            }
+            res.json(resData);
+    },
+    getOrder: async function (req, res) {
+        let {
+            order_id
+        } = req.body;
+        let sql = 'select * from `order` where id = ' + order_id;
+        let data = await query(sql);
+        data.map(v => {
+            v.status == 1 && (v.status = "待付款");
+            v.status == 2 && (v.status = "待收货");
+            v.status == 3 && (v.status = "待发货");
+            v.status == 4 && (v.status = "退款/售后");
+            v.status == 5 && (v.status = "取消订单");
+        })
+        let resData;
+        if(data.length == 1){
+            resData = {
+                code: 20000,
+                status: succStatus,
+                data: data[0]
+            }
+        }else{
+            resData= {
+                code: 10000,
+                status: failStatus
+            }
+        }
+        res.json(resData);
+    },
+    delOrder: async function (req, res) {
+        console.log(req.body);
+        let {
+            order_id
+        } = req.body;
+        let sql = 'delete from `order` where id = ' + order_id;
+        let data = await query(sql);
+        let resData;
+        if (data.affectedRows == 1) {
+            resData = {
+                code: 20000,
+                status: succStatus
+            }
+        } else {
+            resData = {
+                code: 10000,
+                status: failStatus
+            }
+        }
+
+        res.json(resData);
+    },
+    addOrder: async function (req, res) {
+        let {
+            user_id,
+            addr_id,
+            goods_id,
+            spec_id,
+            message,
+            total_num,
+            total_price,
+            status,
+          } = req.body;
+        let sql = "INSERT INTO `order` (`user_id`, `addr_id`,`goods_id`, `spec_id`,`message`, `total_num`, `total_price`, `status`, `create_time`) VALUES ('"+user_id+"', '"+ addr_id+"', '"+goods_id+"', '"+spec_id+"', '"+message+"', '"+total_num+"', '"+total_price+"', '"+status+"', now())";
+        let data = await query(sql);
+        console.log(data);
+        let resData;
+        if (data.affectedRows == 1) {
+            resData = {
+                code: 20000,
+                status: succStatus
+            }
+        } else {
+            resData = {
+                code: 10000,
+                status: failStatus
+            }
+        }
+
         res.json(resData);
     },
     getAddress: async function (req, res) {
@@ -221,7 +341,7 @@ const controller = {
         res.json(resData);
     },
     getAdmin: async function (req, res) {
-        console.log(req.body)
+        // console.log(req.body)
         let {
             username,
             password

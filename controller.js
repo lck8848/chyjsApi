@@ -9,12 +9,20 @@ const controller = {
         let {
             keyword,
             page,
-            pageSize
+            pageSize,
+			order
         } = req.query;
         page = page ? page : 1;
         pageSize = pageSize ? pageSize : 10;
-        let sql = `select * from goods where title like '%${keyword}%' limit ${(page-1)*pageSize}, ${pageSize}`;
-        let data = await query(sql);
+		let sql;
+		if(order === 'desc' || order === 'asc') {
+			sql = `select id, image_url, title, price, create_time from goods where title like '%${keyword}%' order by price ${order} limit ${(page-1)*pageSize}, ${pageSize}`;
+		}else if(order === 'new'){
+			sql = `select id, image_url, title, price, create_time from goods where title like '%${keyword}%' order by create_time asc limit ${(page-1)*pageSize}, ${pageSize}`;
+		}else {
+			sql = `select id, image_url, title, price, create_time from goods where title like '%${keyword}%' limit ${(page-1)*pageSize}, ${pageSize}`;
+		}
+		let data = await query(sql);
         let resData = {
             status: succStatus,
             data: data
@@ -29,7 +37,7 @@ const controller = {
         page = page ? page : 1;
         pageSize = pageSize ? pageSize : 10;
 
-        let sql = `select * from goods where alias like '%1035%' limit ${(page-1)*pageSize}, ${pageSize}`;
+        let sql = `select id, image_url, title, price, sell_point from goods where alias like '%1035%' limit ${(page-1)*pageSize}, ${pageSize}`;
         let data = await query(sql);
         let resData = {
             status: succStatus,
@@ -43,9 +51,6 @@ const controller = {
         } = req.query;
 
         switch (genre) {
-            case 'gift':
-                genre = 1035;
-                break;
             case 'fruits':
                 genre = 1032;
                 break;
@@ -62,7 +67,7 @@ const controller = {
                 genre = 1000;
                 break;
         }
-        let sql = `select * from alias where genre like '%${genre}%'`;
+        let sql = `select id, alias_name, alias_code from alias where genre like '%${genre}%'`;
         let data = await query(sql);
         let resData = {
             status: succStatus,
@@ -72,8 +77,12 @@ const controller = {
     },
     getClassifyGoods: async function (req, res) {
         let {
-            aliasCode
+            aliasCode,
+			page,
+			pageSize
         } = req.query;
+		page = page ? page : 1;
+		pageSize = pageSize ? pageSize : 10;
         if (!aliasCode) {
             res.json({
                 satus: failStatus,
@@ -81,10 +90,7 @@ const controller = {
             });
             return;
         }
-        let sql = `select * from goods where alias like '%${aliasCode}%'`;
-        if (aliasCode === '1000') {
-            sql = `select * from goods order by total_sold_num desc limit 10`;
-        }
+        let sql = `select id, image_url, title, price, sell_point from goods where alias like '%${aliasCode}%' limit ${(page-1)*pageSize}, ${pageSize}`;
         let data = await query(sql);
         let resData = {
             status: succStatus,
@@ -104,9 +110,11 @@ const controller = {
             });
             return;
         }
-        let sql = `select * from goods where id = ${g_id}`;
+        let sql = `select id, seller_id, original, image_url, sell_point, discount, sold_status, title, details, 
+		postage, spec_title, total_sold_num, activ_end_time from goods where id = ${g_id}`;
         let sql2 = `select * from images where goods_id = ${g_id}`;
-        let queryArr = [query(sql), query(sql2)];
+		let sql3 = `select * from spec where goods_id = ${g_id}`;
+        let queryArr = [query(sql), query(sql2), query(sql3)];
         let data = [];
         try {
             data = await Promise.all(queryArr);
@@ -124,10 +132,26 @@ const controller = {
             });
             return;
         }
-        data[0][0].images = data[1];
+		let goods = data[0][0];
+        goods.images = data[1];
+		goods.speclist = data[2];
+		let stock = 0;
+		// 计算总数量
+		data[2].map(v => {
+			stock += v.stock_num;
+		})
+		goods.stock_num = stock;
+		//计算最大和最小价格
+		let arr = data[2].sort((v1, v2) => {
+			return v1 - v2;
+		})
+		// 如果价格不一样就拼接价格范围
+		goods.price = arr[0] !== arr[arr.length-1] ?arr[0].price.toFixed(2)+'-'+arr[arr.length-1].price.toFixed(2)
+			:arr[0].price.toFixed(2);
+			
         let resData = {
             status: succStatus,
-            data: data[0][0]
+            data: goods
         }
         res.json(resData);
     },
@@ -136,7 +160,7 @@ const controller = {
             pageSize
         } = req.query;
         pageSize = pageSize ? pageSize : 10;
-        let sql = `select * from goods order by total_sold_num desc limit ${ pageSize }`;
+        let sql = `select id, image_url, title, price, sell_point from goods order by total_sold_num desc limit ${ pageSize }`;
         let data = await query(sql);
         let resData = {
             status: succStatus,

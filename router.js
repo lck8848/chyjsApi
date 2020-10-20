@@ -1,5 +1,10 @@
 const express = require('express');
+const multer = require('multer');
 const controller = require('./controller.js');
+
+let upload = multer({
+    dest: "./uploads/"
+})
 const route = express.Router();
 
 //搜索
@@ -26,6 +31,24 @@ route.get('/api/getNoteList', controller.getNoteList);
 //笔记详情
 route.get('/api/getNoteDetail', controller.getNoteDetail);
 
+//商品列表
+route.get('/api/getGoodsList', controller.getGoodsList);
+
+//商品列表
+route.post('/api/getGoodsListByStatus', controller.getGoodsListByStatus);
+
+//分类
+route.post('/api/getAlias', controller.getAlias);
+
+//分类
+route.get('/api/getAliasList', controller.getAliasList);
+
+//商品
+route.post('/api/getGoods', controller.getGoods);
+
+//修改/删除商品
+route.post('/api/updGoods', controller.updGoods);
+
 //订单列表
 route.get('/api/getOrderList', controller.getOrderList);
 
@@ -41,11 +64,26 @@ route.post('/api/delOrder', controller.delOrder);
 //添加订单 
 route.post('/api/addOrder', controller.addOrder);
 
+//添加订单 
+route.post('/api/updOrder', controller.updOrder);
+
 //地址列表
 route.get('/api/getAddress', controller.getAddress);
 
-//地址列表
+//管理员
 route.post('/api/getAdmin', controller.getAdmin);
+
+//商家
+route.post('/api/getSeller', controller.getSeller);
+
+//读取本地图片
+route.get('/api/uploads', controller.readImg);
+
+//读取本地图片地址
+route.get('/api/uploads/imgUrl', controller.readImgAddr);
+
+//文件上传
+route.post("/api/uploadFeature", upload.single('feature'), controller.uploadFeature);
 
 //模拟后台模板数据
 route.get('/api/user/info', controller.userInfo);

@@ -4,7 +4,8 @@ var connection = mysql.createConnection({
     port     : 3307,
     user     : 'chyjs',
     password : '123456',
-    database : 'chyjs'
+    database : 'chyjs',
+    multipleStatements: true
 });
 connection.connect( ()=> {
     console.log("数据库已连接");

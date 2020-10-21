@@ -249,11 +249,11 @@ const controller = {
 		let { status, page, pageSize } = req.query;
 		page = page ? page : 1;
 		pageSize = pageSize ? pageSize : 10;
-		let sql = `select id, image_url, title, price from goods where sold_status = ${status} limit ${(page-1)*pageSize}, ${pageSize}`;
+		let sql = `select id, image_url, title, price, original, discount, activ_end_time, sell_point from goods where sold_status = ${status} limit ${(page-1)*pageSize}, ${pageSize}`;
 		let data = await query(sql);
 		let resData = {
 		    status: succStatus,
-		    data: data[0]
+		    data: data
 		}
 		res.json(resData);
 	},

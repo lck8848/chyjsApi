@@ -226,7 +226,6 @@ const controller = {
     getAliasList: async function (req, res) {
         let sql = 'select * from `alias`';
         let data = await query(sql);
-        console.log(data);
         let resData = {
             code: 20000,
             status: succStatus,

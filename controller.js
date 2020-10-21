@@ -31,7 +31,7 @@ const controller = {
 		if(order === 'desc' || order === 'asc') {
 			sql = `select id, image_url, title, price, create_time from goods where title like '%${keyword}%' order by price ${order} limit ${(page-1)*pageSize}, ${pageSize}`;
 		}else if(order === 'new'){
-			sql = `select id, image_url, title, price, create_time from goods where title like '%${keyword}%' order by create_time asc limit ${(page-1)*pageSize}, ${pageSize}`;
+			sql = `select id, image_url, title, price, create_time from goods where title like '%${keyword}%' order by create_time desc limit ${(page-1)*pageSize}, ${pageSize}`;
 		}else {
 			sql = `select id, image_url, title, price, create_time from goods where title like '%${keyword}%' limit ${(page-1)*pageSize}, ${pageSize}`;
 		}
@@ -186,7 +186,7 @@ const controller = {
             pageSize
         } = req.query;
         pageSize = pageSize ? pageSize : 6;
-        let sql = `select id, title, img_url from note order by create_time asc limit ${pageSize}`;
+        let sql = `select id, title, img_url from note order by create_time desc limit ${pageSize}`;
         let data = await query(sql);
 
         let resData = {
@@ -204,7 +204,7 @@ const controller = {
 		pageSize = pageSize ? pageSize : 6;
 		
 		let sql = `select n1.id, n1.title, n1.img_url, n1.goods_id, n1.label, n1.create_time, group_concat(n2.img_url) as imgs from note n1
-		,noteimg n2 where n1.id = n2.note_id GROUP BY n1.goods_id order by n1.create_time asc limit ${(page-1)*pageSize}, ${pageSize}`;
+		,noteimg n2 where n1.id = n2.note_id GROUP BY n1.goods_id order by n1.create_time desc limit ${(page-1)*pageSize}, ${pageSize}`;
 		let data = await query(sql);
 		data.map( v => {
 			v.imgs = v.imgs.split(',');
@@ -256,6 +256,38 @@ const controller = {
 		    data: data[0]
 		}
 		res.json(resData);
+	},
+	getRecommend: async function(req, res){
+		let { pageSize } = req.query;
+		pageSize = pageSize ? pageSize : 18;
+		
+		let sql = `SELECT id, title, price, image_url FROM goods ORDER BY RAND() LIMIT ${pageSize}`;
+		let data = await query(sql);
+		let resData = {
+		    status: succStatus,
+		    data: data
+		}
+		res.json(resData);
+	},
+	getOrderByUserId: async function(req, res){
+		let { u_id, status } = req.query;
+		let sql = 'SELECT o.id, o.seller_id, o.goods_id, o.spec_id, o.status, o.total_num, o.total_price, s.nickname, g.title, g.image_url, sp.spec_name, sp.price FROM `order` o ' +
+			`INNER JOIN seller s on o.seller_id = s.id
+			INNER JOIN goods g ON o.goods_id = g.id
+			INNER JOIN spec sp ON o.spec_id = sp.id
+			where o.user_id = ${u_id} ${status ?'and o.status = '+status :''} order by o.create_time desc`;
+		
+		let data = await query(sql);
+		let resData = {
+		    status: succStatus,
+		    data: data
+		}
+		res.json(resData);
+	},
+	getOrderDetails: async function(req, res){
+		let { o_id } = req.query;
+		let sql = 'select * from `order` where id = '+o_id;
+		res.json({data:'aaa'});
 	}
 };
 

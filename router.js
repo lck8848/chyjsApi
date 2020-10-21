@@ -37,4 +37,13 @@ route.get('/api/getNoteDetail', controller.getNoteDetail);
 //根据商品状态获取商品
 route.get('/api/getGoodsByStatus', controller.getGoodsByStatus);
 
+//推荐商品
+route.get('/api/getRecommend', controller.getRecommend);
+
+//根据用户id获取订单
+route.get('/api/getOrderByUserId', controller.getOrderByUserId);
+
+//订单详情
+route.get('/api/getOrderDetails', controller.getOrderDetails);
+
 module.exports = route;

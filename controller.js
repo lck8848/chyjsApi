@@ -1,5 +1,6 @@
 const axios = require('axios');
 const fs = require('fs');
+const moment = require('moment');
 const query = require('./query.js');
 
 const succStatus = 0;
@@ -147,6 +148,8 @@ const controller = {
             return;
         }
 		let goods = data[0][0];
+		let date = moment(goods.create_time).format('YYYY-MM-DD hh:mm:ss');
+		goods.create_time = new Date(date).getTime();
         goods.images = data[1];
 		goods.speclist = data[2];
 		let stock = 0;
@@ -252,6 +255,10 @@ const controller = {
 		pageSize = pageSize ? pageSize : 10;
 		let sql = `select id, image_url, title, price, original, discount, activ_end_time, sell_point from goods where sold_status = ${status} limit ${(page-1)*pageSize}, ${pageSize}`;
 		let data = await query(sql);
+		data.map( v => {
+			let date = moment(v.create_time).format('YYYY-MM-DD hh:mm:ss');
+			v.create_time = new Date(date).getTime();
+		});
 		let resData = {
 		    status: succStatus,
 		    data: data
@@ -272,11 +279,12 @@ const controller = {
 	},
 	getOrderByUserId: async function(req, res){
 		let { u_id, status } = req.query;
-		let sql = 'SELECT o.id, o.seller_id, o.goods_id, o.spec_id, o.status, o.total_num, o.total_price, s.nickname, g.title, g.image_url, sp.spec_name, sp.price FROM `order` o ' +
+		let isStatus = ([1, 2, 3, 4].indexOf(status) !== -1);
+		let sql = 'SELECT o.id, o.seller_id, o.goods_id, o.spec_id, o.status, o.total_num, o.total_price, s.nickname as shop_name, g.title, g.image_url, sp.spec_name, sp.price FROM `order` o ' +
 			`INNER JOIN seller s on o.seller_id = s.id
 			INNER JOIN goods g ON o.goods_id = g.id
 			INNER JOIN spec sp ON o.spec_id = sp.id
-			where o.user_id = ${u_id} ${status ?'and o.status = '+status :''} order by o.create_time desc`;
+			where o.user_id = ${u_id} ${isStatus ?'and o.status = '+status :''} order by o.create_time desc`;
 		
 		let data = await query(sql);
 		let resData = {

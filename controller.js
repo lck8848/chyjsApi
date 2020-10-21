@@ -277,13 +277,16 @@ const controller = {
 		res.json(resData);
 	},
 	getOrderByUserId: async function(req, res){
-		let { u_id, status } = req.query;
-		let isStatus = ([1, 2, 3, 4].indexOf(status) !== -1);
-		let sql = 'SELECT o.id, o.seller_id, o.goods_id, o.spec_id, o.status, o.total_num, o.total_price, s.nickname as shop_name, g.title, g.image_url, sp.spec_name, sp.price FROM `order` o ' +
+		let { u_id, status, keyword } = req.query;
+		let isStatus = (['1', '2', '3', '4'].indexOf(status) !== -1);
+		let isKeyword = keyword !== '-1';
+		let sql = 'SELECT o.id, o.status, o.total_num, o.total_price, s.nickname as shop_name, g.title, g.image_url, sp.spec_name, sp.price FROM `order` o ' +
 			`INNER JOIN seller s on o.seller_id = s.id
 			INNER JOIN goods g ON o.goods_id = g.id
 			INNER JOIN spec sp ON o.spec_id = sp.id
-			where o.user_id = ${u_id} ${isStatus ?'and o.status = '+status :''} order by o.create_time desc`;
+			where o.user_id = ${u_id} ${isStatus ?'and o.status = '+status :''}
+			 ${isKeyword ?'and (g.title like "%'+keyword+'%" or s.nickname like "%'+keyword+'%")' :'' }
+			 order by o.create_time desc`;
 		
 		let data = await query(sql);
 		let resData = {
@@ -296,6 +299,21 @@ const controller = {
 		let { o_id } = req.query;
 		let sql = 'select * from `order` where id = '+o_id;
 		res.json({data:'aaa'});
+	},
+	getFakingData: async function(req, res){
+		let sql = 'select * from faking';
+		let data = await query(sql);
+		res.json(data);
+	},
+	getGoodsByIds: async function(req, res){
+		let { ids } = req.query;
+		let sql = `select id, title, price, image_url from goods where id in (${ids})`;
+		let data = await query(sql);
+		let resData = {
+		    status: succStatus,
+		    data: data
+		}
+		res.json(resData);
 	}
 };
 

@@ -181,14 +181,12 @@ const controller = {
         }
         res.json(resData);
     },
-    getNoteList: async function (req, res) {
+    getHomeNoteList: async function (req, res) {
         let {
-            page,
             pageSize
         } = req.query;
-        page = page ? page : 1;
         pageSize = pageSize ? pageSize : 6;
-        let sql = `select * from note limit ${(page-1)*pageSize}, ${pageSize}`;
+        let sql = `select id, title, img_url from note order by create_time asc limit ${pageSize}`;
         let data = await query(sql);
 
         let resData = {
@@ -197,6 +195,26 @@ const controller = {
         }
         res.json(resData);
     },
+	getNoteList: async function (req, res) {
+		let {
+		    page,
+		    pageSize
+		} = req.query;
+		page = page ? page : 1;
+		pageSize = pageSize ? pageSize : 6;
+		
+		let sql = `select n1.id, n1.title, n1.img_url, n1.goods_id, n1.label, n1.create_time, group_concat(n2.img_url) as imgs from note n1
+		,noteimg n2 where n1.id = n2.note_id GROUP BY n1.goods_id order by n1.create_time asc limit ${(page-1)*pageSize}, ${pageSize}`;
+		let data = await query(sql);
+		data.map( v => {
+			v.imgs = v.imgs.split(',');
+		});
+		let resData = {
+		    status: succStatus,
+		    data: data
+		}
+		res.json(resData);
+	},
     getNoteDetail: async function (req, res) {
         let {
             n_id
@@ -226,7 +244,19 @@ const controller = {
             data: data[0]
         }
         res.json(resData);
-    }
+    },
+	getGoodsByStatus: async function(req, res){
+		let { status, page, pageSize } = req.query;
+		page = page ? page : 1;
+		pageSize = pageSize ? pageSize : 10;
+		let sql = `select id, image_url, title, price from goods where sold_status = ${status} limit ${(page-1)*pageSize}, ${pageSize}`;
+		let data = await query(sql);
+		let resData = {
+		    status: succStatus,
+		    data: data[0]
+		}
+		res.json(resData);
+	}
 };
 
 module.exports = controller;

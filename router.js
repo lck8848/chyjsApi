@@ -25,10 +25,16 @@ route.get('/api/getGoodsDetail', controller.getGoodsDetail);
 //热销商品
 route.get('/api/getHotGoods', controller.getHotGoods);
 
-//笔记列表
+//笔记首页列表
+route.get('/api/getHomeNoteList', controller.getHomeNoteList);
+
+// 笔记列表
 route.get('/api/getNoteList', controller.getNoteList);
 
 //笔记详情
 route.get('/api/getNoteDetail', controller.getNoteDetail);
+
+//根据商品状态获取商品
+route.get('/api/getGoodsByStatus', controller.getGoodsByStatus);
 
 module.exports = route;

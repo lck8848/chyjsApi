@@ -229,7 +229,8 @@ const controller = {
             });
             return;
         }
-        let sql = `select * from note where id = ${n_id}`;
+        let sql = `select n.id, n.title, n.content, n.browse, n.favour, n.goods_id, n.create_time, s.shop_img, s.nickname as shop_name from note n
+			INNER JOIN seller s ON s.id = n.seller_id where n.id = ${n_id}`;
         let data = [];
         try {
             data = await query(sql);
@@ -240,7 +241,7 @@ const controller = {
             });
         }
         let message = data.length === 0 ? "笔记不存在" : "";
-
+		data.create_time = moment(data.create_time).format('YYYY-MM-DD hh:mm:ss');
         let resData = {
             status: succStatus,
             message: message,
@@ -297,8 +298,22 @@ const controller = {
 	},
 	getOrderDetails: async function(req, res){
 		let { o_id } = req.query;
-		let sql = 'select * from `order` where id = '+o_id;
-		res.json({data:'aaa'});
+		let sql = 'select id, user_id, goods_id, addr_id, spec_id, status, message, total_num, total_price from `order` where id = '+o_id;
+		let data = await query(sql);
+		let sql2 = `select g.id, g.title, g.image_url, g.postage, s.spec_name, s.price, s.original, s2.nickname from goods g
+			INNER JOIN spec s ON s.goods_id = g.id
+			INNER JOIN seller s2 ON s2.id = g.seller_id
+			where s.id = ${data[0].spec_id} and g.id = ${data[0].goods_id}`;
+		let sql3 = `select nickname, phone, addr_area, addr_detail, addr_house from addr where id = ${data[0].addr_id}`;
+		let sqlArr = [query(sql2), query(sql3)];
+		let data2 = await Promise.all(sqlArr);
+		data[0].goods = data2[0];
+		data[0].addr = data2[1];
+		let resData = {
+		    status: succStatus,
+		    data: data[0]
+		}
+		res.json(resData);
 	},
 	getFakingData: async function(req, res){
 		let sql = 'select * from faking';
@@ -315,6 +330,7 @@ const controller = {
 		}
 		res.json(resData);
 	}
+	
 };
 
 module.exports = controller;

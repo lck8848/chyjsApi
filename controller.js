@@ -6,18 +6,6 @@ const query = require('./query.js');
 const succStatus = 0;
 const failStatus = 1;
 
-let sold = {
-    0: "正常",
-    1: "满减",
-    2: "优惠",
-    3: "新品",
-    4: "下架"
-};
-let del = {
-    0: "未删除",
-    1: "已删除"
-}
-
 const controller = {
     getSearchResult: async function (req, res) {
         let {
@@ -104,7 +92,13 @@ const controller = {
             });
             return;
         }
-        let sql = `select id, image_url, title, price, sell_point from goods where alias like '%${aliasCode}%' limit ${(page-1)*pageSize}, ${pageSize}`;
+		let sql;;
+		if(aliasCode === '1051'){
+			sql = `select id, image_url, title, price, sell_point from goods order by total_sold_num desc limit 10`;
+		}else {
+			sql = `select id, image_url, title, price, sell_point from goods where alias like '%${aliasCode}%' limit ${(page-1)*pageSize}, ${pageSize}`;
+			
+		}
         let data = await query(sql);
         let resData = {
             status: succStatus,
@@ -128,6 +122,7 @@ const controller = {
 		postage, spec_title, total_sold_num, activ_end_time from goods where id = ${g_id}`;
         let sql2 = `select * from images where goods_id = ${g_id}`;
 		let sql3 = `select * from spec where goods_id = ${g_id}`;
+		//同时获取商品，商品规格，商品轮播图
         let queryArr = [query(sql), query(sql2), query(sql3)];
         let data = [];
         try {
@@ -279,7 +274,9 @@ const controller = {
 	},
 	getOrderByUserId: async function(req, res){
 		let { u_id, status, keyword } = req.query;
+		//判断是否有在筛选状态
 		let isStatus = (['1', '2', '3', '4'].indexOf(status) !== -1);
+		//判断用户是否正在搜索
 		let isKeyword = keyword !== '-1';
 		let sql = 'SELECT o.id, o.status, o.total_num, o.total_price, s.nickname as shop_name, g.title, g.image_url, sp.spec_name, sp.price FROM `order` o ' +
 			`INNER JOIN seller s on o.seller_id = s.id
@@ -300,15 +297,16 @@ const controller = {
 		let { o_id } = req.query;
 		let sql = 'select id, user_id, goods_id, addr_id, spec_id, status, message, total_num, total_price from `order` where id = '+o_id;
 		let data = await query(sql);
-		let sql2 = `select g.id, g.title, g.image_url, g.postage, s.spec_name, s.price, s.original, s2.nickname from goods g
+		//根据获得的订单获取对应的商品，商家，用户地址
+		let sql2 = `select g.id, g.title, g.image_url, g.postage, s.spec_name, s.price, s.original, s2.nickname as shop_name from goods g
 			INNER JOIN spec s ON s.goods_id = g.id
 			INNER JOIN seller s2 ON s2.id = g.seller_id
 			where s.id = ${data[0].spec_id} and g.id = ${data[0].goods_id}`;
 		let sql3 = `select nickname, phone, addr_area, addr_detail, addr_house from addr where id = ${data[0].addr_id}`;
 		let sqlArr = [query(sql2), query(sql3)];
 		let data2 = await Promise.all(sqlArr);
-		data[0].goods = data2[0];
-		data[0].addr = data2[1];
+		data[0].goods = data2[0][0];
+		data[0].addr = data2[1][0];
 		let resData = {
 		    status: succStatus,
 		    data: data[0]

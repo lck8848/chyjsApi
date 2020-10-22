@@ -46,4 +46,9 @@ route.get('/api/getOrderByUserId', controller.getOrderByUserId);
 //订单详情
 route.get('/api/getOrderDetails', controller.getOrderDetails);
 
+//根据商品ids字符串获取商品
+route.get('/api/getGoodsByIds', controller.getGoodsByIds);
+
+route.get('/api/getFakingData', controller.getFakingData);
+
 module.exports = route;

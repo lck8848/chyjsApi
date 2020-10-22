@@ -41,7 +41,7 @@ const controller = {
     getAliasList: async function (req, res) {
         let sql = 'select * from `alias`';
         let data = await query(sql);
-        console.log(data);
+        // console.log(data);
         let resData = {
             code: 20000,
             status: succStatus,
@@ -83,6 +83,72 @@ const controller = {
         }
         res.json(resData);
     },
+    getImagesByGoods: async function (req, res) {
+        let {
+            goods_id
+        } = req.body;
+        let sql = "select * from `images` where goods_id = '" + goods_id + "' and is_delete = '0'; ";
+        // console.log(sqlStr);
+        let data = await query(sql);
+        let resData;
+        if (data.length >= 1) {
+            resData = {
+                code: 20000,
+                status: succStatus,
+                data
+            }
+        } else {
+            resData = {
+                code: 10000,
+                status: failStatus
+            }
+        }
+        res.json(resData);
+    },
+    getSpecByGoods: async function (req, res) {
+        let {
+            goods_id
+        } = req.body;
+        let sql = "select * from `spec` where goods_id = '" + goods_id + "' and is_delete = '0'; ";
+        // console.log(sqlStr);
+        let data = await query(sql);
+        let resData;
+        if (data.length >= 1) {
+            resData = {
+                code: 20000,
+                status: succStatus,
+                data
+            }
+        } else {
+            resData = {
+                code: 10000,
+                status: failStatus
+            }
+        }
+        res.json(resData);
+    },
+    getSpec: async function (req, res) {
+        let {
+            spec_id
+        } = req.body;
+        let sql = "select * from `spec` where id = '" + spec_id + "'; ";
+        // console.log(sqlStr);
+        let data = await query(sql);
+        let resData;
+        if (data.length >= 1) {
+            resData = {
+                code: 20000,
+                status: succStatus,
+                data
+            }
+        } else {
+            resData = {
+                code: 10000,
+                status: failStatus
+            }
+        }
+        res.json(resData);
+    },
     getAlias: async function (req, res) {
         let {
             alias_code
@@ -116,6 +182,63 @@ const controller = {
                 status: failStatus
             }
         }
+        res.json(resData);
+    },
+    
+    addGoods: async function (req, res) {
+        
+    //   console.log("this.seller_id",this.seller_id);
+    //   console.log("this.price",this.price);
+    //   console.log("this.original",this.original);
+    //   console.log("this.alias",this.alias);
+    //   console.log("this.imageUrl",this.imageUrl);
+    //   console.log("this.sell_point",this.sell_point);
+    //   console.log("this.discount",this.discount);
+    //   console.log("this.sold_status",this.sold_status);
+    //   console.log("this.title",this.title);
+    //   console.log("this.details",this.details);
+    //   console.log("this.postage",this.postage);
+    //   console.log("this.spec_title",this.spec_title);
+    //   console.log("this.total_sold_num",this.total_sold_num);
+    //   console.log("this.activ_end_time",this.activ_end_time);
+        let {
+            seller_id,
+            price,
+            alias,
+            original,
+            imageUrl,
+            sell_point,
+            discount,
+            sold_status,
+            title,
+            details,
+            postage,
+            spec_title,
+            total_sold_num,
+            activ_end_time
+        } = req.body;
+        let sql;
+        if(activ_end_time == "null" || activ_end_time == "Invalid date"){
+            sql = "INSERT INTO `goods` (`seller_id`, `price`, `original`, `alias`, `image_url`, `sell_point`, `discount`, `sold_status`, `title`, `details`, `postage`, `spec_title`, `total_sold_num`, `create_time`, `is_delete`) VALUES ('"+seller_id+"', '"+price+"', '"+original+"', '"+alias+"', '"+imageUrl+"', '"+sell_point+"', '"+discount+"', '"+sold_status+"', '"+title+"', '"+details+"', '"+postage+"', '"+spec_title+"', '"+total_sold_num+"', now(), '0');";
+        }else{
+            sql = "INSERT INTO `goods` (`seller_id`, `price`, `original`, `alias`, `image_url`, `sell_point`, `discount`, `sold_status`, `title`, `details`, `postage`, `spec_title`, `total_sold_num`, `activ_end_time`, `create_time`, `is_delete`) VALUES ('"+seller_id+"', '"+price+"', '"+original+"', '"+alias+"', '"+imageUrl+"', '"+sell_point+"', '"+discount+"', '"+sold_status+"', '"+title+"', '"+details+"', '"+postage+"', '"+spec_title+"', '"+total_sold_num+"', '"+activ_end_time+"', now(), '0');";
+        }
+        console.log(sql);
+        let data = await query(sql);
+        let resData;
+        if (data.affectedRows == 1) {
+            resData = {
+                code: 20000,
+                insertId:data.insertId,
+                status: succStatus
+            }
+        } else {
+            resData = {
+                code: 10000,
+                status: failStatus
+            }
+        }
+
         res.json(resData);
     },
     getGoods: async function (req, res) {
@@ -163,10 +286,10 @@ const controller = {
         } = req.body;
         // console.log(activ_end_time);
         let sql = "UPDATE `goods` SET `seller_id`='"+seller_id+"', `price`='"+price+"', `original`="+original+", `alias`='"+alias+"', `image_url`='"+image_url+"', `discount`='"+discount+"', `sold_status`='"+sold_status+"', `title`='"+title+"', `details`='"+details+"', `postage`='"+postage+"', `spec_title`='"+spec_title+"', `total_sold_num`='"+total_sold_num+"', ";
-        if(activ_end_time != null){
-            sql += "`activ_end_time`='"+activ_end_time+"', `is_delete`='"+is_delete+"' WHERE (`id`='"+id+"');";
+        if(activ_end_time == "null" || activ_end_time == "Invalid date"){
+            sql += "`activ_end_time`=null, `is_delete`='"+is_delete+"' WHERE (`id`='"+id+"');";
         }else{
-            sql += "`is_delete`='"+is_delete+"' WHERE (`id`='"+id+"');";
+            sql += "`activ_end_time`='"+activ_end_time+"', `is_delete`='"+is_delete+"' WHERE (`id`='"+id+"');";
         }
         // console.log(sql);
         let data = await query(sql);
@@ -264,6 +387,97 @@ const controller = {
         }
         res.json(resData);
     },
+    addSpec: async function (req, res) {
+        let {
+            goods_id,
+            spec_name,
+            price,
+            original,
+            stock_num
+        } = req.body;
+        let sql = "INSERT INTO `spec` (`goods_id`, `spec_name`, `price`, `original`, `stock_num`, `is_delete`) VALUES ('"+goods_id+"', '"+spec_name+"', '"+price+"', '"+original+"', '"+stock_num+"','0');";
+        let data = await query(sql);
+        let resData;
+        if (data.affectedRows == 1) {
+            resData = {
+                code: 20000,
+                status: succStatus
+            }
+        } else {
+            resData = {
+                code: 10000,
+                status: failStatus
+            }
+        }
+
+        res.json(resData);
+    },
+    
+    delSpecByGoods: async function (req, res) {
+        let {
+            goods_id
+        } = req.body;
+        let sql = "UPDATE `spec` SET `is_delete`='1' WHERE (`goods_id`='"+goods_id+"');";
+        let data = await query(sql);
+        let resData;
+        if (data.affectedRows == 1) {
+            resData = {
+                code: 20000,
+                status: succStatus
+            }
+        } else {
+            resData = {
+                code: 10000,
+                status: failStatus
+            }
+        }
+
+        res.json(resData);
+    },
+    addImages: async function (req, res) {
+        let {
+            goods_id,
+            img_url
+        } = req.body;
+        let sql = "INSERT INTO `images` (`goods_id`, `img_url`, `is_delete`) VALUES ('"+goods_id+"', '"+img_url+"','0');";
+        let data = await query(sql);
+        let resData;
+        if (data.affectedRows >= 1) {
+            resData = {
+                code: 20000,
+                status: succStatus
+            }
+        } else {
+            resData = {
+                code: 10000,
+                status: failStatus
+            }
+        }
+
+        res.json(resData);
+    },
+    
+    delImagesByGoods: async function (req, res) {
+        let {
+            goods_id
+        } = req.body;
+        let sql = "UPDATE `images` SET `is_delete`='1' WHERE (`goods_id`='"+goods_id+"');";
+        let data = await query(sql);
+        let resData;
+        if (data.affectedRows >= 1) {
+            resData = {
+                code: 20000,
+                status: succStatus
+            }
+        } else {
+            resData = {
+                code: 10000,
+                status: failStatus
+            }
+        }
+
+        res.json(resData);
+    },
     delOrder: async function (req, res) {
         console.log(req.body);
         let {
@@ -347,16 +561,15 @@ const controller = {
     },
     getAddress: async function (req, res) {
         let {
-            u_id
-        } = req.query;
-        if (!u_id) {
-            res.json({
-                satus: failStatus,
-                message: "缺少n_id"
-            });
-            return;
+            u_id,
+            addr_id
+        } = req.body;
+        let sql
+        if(u_id){
+            sql = `select * from addr where user_id = ${u_id}`;
+        }else if(addr_id){
+            sql = `select * from addr where id = ${addr_id}`;
         }
-        let sql = `select * from addr where user_id = ${u_id}`;
         let data = await query(sql);
 
         let resData = {

@@ -49,6 +49,11 @@ route.get('/api/getOrderDetails', controller.getOrderDetails);
 //根据商品ids字符串获取商品
 route.get('/api/getGoodsByIds', controller.getGoodsByIds);
 
+//登录
+route.post('/api/wxlogin', controller.wxlogin);
+
+route.post('/api/addAddr', controller.addAddr);
+
 route.get('/api/getFakingData', controller.getFakingData);
 
 module.exports = route;

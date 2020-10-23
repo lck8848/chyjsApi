@@ -3,6 +3,7 @@ const fs = require('fs');
 const moment = require('moment');
 const query = require('./query.js');
 const { getToken, checkToken } = require('./util/token.js');
+const rp = require('request-promise');
 
 const succStatus = 0;
 const failStatus = 1;
@@ -332,10 +333,13 @@ const controller = {
 	},
 	wxlogin: async function(req, res){
 		let { code, userInfo } = req.body;
-		let appid = 'wx39617bbe58d039fc';
-		let appSecret = '1d91825aacf2df83f733c9490b49d482'
+		console.log(code);
+		let appid = 'wxff39aac2e9520f5a';
+		let appSecret = 'f643291d06c043d24130e1a08ad53015'
 		let { data } = await axios.get(`https://api.weixin.qq.com/sns/jscode2session?appid=${appid}&secret=${appSecret}&js_code=${code}&grant_type=authorization_code`);
 		let resData = {};
+		
+		console.log(data);
 		if(data.errcode){
 			resData.errmsg = data.errmsg;
 		}else {
@@ -370,7 +374,39 @@ const controller = {
 		let resData = {};
 		resData.code = data.affectedRows > 0 ?succStatus :failStatus;
 		res.json(resData);
+	},
+	wxlogin: async function(req, res){
+		let { code, userInfo } = req.body;
+		console.log(code);
+		try {
+		  const options = {
+			method: 'GET',
+			url: 'https://api.weixin.qq.com/sns/jscode2session',
+			qs: {
+			  grant_type: 'authorization_code',
+			  js_code: code,
+			  secret: "f643291d06c043d24130e1a08ad53015",
+			  appid: "wxff39aac2e9520f5a"
+			}
+		  };
+		  let sessionData = await rp(options);
+		  sessionData = JSON.parse(sessionData);
+		  if (!sessionData.openid) {
+			return null;
+		  }
+		  console.log(sessionData.openId);
+		  var resData = {
+			openId:sessionData.openid,
+			sessionKey:sessionData.session_key
+		  }
+		  // return data;
+			res.json(resData)
+
+		} catch (e) {
+		  return null;
+		}
 	}
+
 };
 
 module.exports = controller;

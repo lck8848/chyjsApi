@@ -7,17 +7,38 @@ let upload = multer({
 })
 const route = express.Router();
 
+//添加规格
+route.post('/api/addSpec', controller.addSpec);
+
+//添加轮播图
+route.post('/api/addImages', controller.addImages);
+
 //商品列表
 route.get('/api/getGoodsList', controller.getGoodsList);
 
 //商品列表
 route.post('/api/getGoodsListByStatus', controller.getGoodsListByStatus);
 
+//轮播图
+route.post('/api/getImagesByGoods', controller.getImagesByGoods);
+
+//删除轮播图 
+route.post('/api/delImagesByGoods', controller.delImagesByGoods);
+
+//规格
+route.post('/api/getSpecByGoods', controller.getSpecByGoods);
+route.post('/api/getSpec', controller.getSpec);
+//删除规格
+route.post('/api/delSpecByGoods', controller.delSpecByGoods);
+
 //分类
 route.post('/api/getAlias', controller.getAlias);
 
 //分类
 route.get('/api/getAliasList', controller.getAliasList);
+
+//添加商品
+route.post('/api/addGoods', controller.addGoods);
 
 //商品
 route.post('/api/getGoods', controller.getGoods);
@@ -44,7 +65,7 @@ route.post('/api/addOrder', controller.addOrder);
 route.post('/api/updOrder', controller.updOrder);
 
 //地址列表
-route.get('/api/getAddress', controller.getAddress);
+route.post('/api/getAddress', controller.getAddress);
 
 //管理员
 route.post('/api/getAdmin', controller.getAdmin);

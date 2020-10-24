@@ -60,6 +60,11 @@ route.post('/api/addAddr', controller.addAddr);
 //修改订单状态
 route.post('/api/updateOrderStatus', controller.updateOrderStatus);
 
+route.get('/api/checkToken', controller.checkToken);
+
 route.get('/api/getFakingData', controller.getFakingData);
+
+//修改用户属性
+route.post('/api/updateUser', controller.updateUser);
 
 module.exports = route;

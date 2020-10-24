@@ -102,7 +102,10 @@ const controller = {
 			sql = `select id, image_url, title, price, sell_point from goods where alias like '%${aliasCode}%' limit ${(page-1)*pageSize}, ${pageSize}`;
 			
 		}
-        let data = await query(sql);
+		let data = await query(sql);
+		data.map(v=>{
+			v.show = true;
+		})
         let resData = {
             status: succStatus,
             data: data
@@ -138,7 +141,6 @@ const controller = {
 			}
 
 		})
-		console.log(data);
 		let resData = {
 			status: succStatus,
 			data
@@ -429,7 +431,7 @@ const controller = {
 		  
 		  let resData = {
 			token: token,
-			user: user[0];
+			user: user[0]
 		  }
 			res.json(resData)
 

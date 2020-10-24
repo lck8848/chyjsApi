@@ -19,6 +19,9 @@ route.get('/api/getClassify', controller.getClassify);
 //根据classify的alias_code获取分类商品
 route.get('/api/getClassifyGoods', controller.getClassifyGoods);
 
+//根据classify的alias_code获取分类所有商品
+route.get('/api/getClassifyGoodsByAll', controller.getClassifyGoodsByAll);
+
 //商品详情
 route.get('/api/getGoodsDetail', controller.getGoodsDetail);
 

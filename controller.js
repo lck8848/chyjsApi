@@ -112,6 +112,42 @@ const controller = {
         }
         res.json(resData);
     },
+    getClassifyGoodsByAll: async function (req, res) {
+        let {
+            aliasCodes,
+			page,
+			pageSize
+        } = req.query;
+		page = page ? page : 1;
+		pageSize = pageSize ? pageSize : 10;
+        if (!aliasCodes) {
+            res.json({
+                satus: failStatus,
+                message: "缺少aliasCode"
+            });
+            return;
+		}
+		let sqlStr = "";
+		aliasCodes.split(",").map(v=>{
+			let sql = `select id, image_url, title, price, sell_point from goods where alias like '%${v}%' limit ${(page-1)*pageSize}, ${pageSize};`;
+			sqlStr += sql;
+		})
+		let data = await query(sqlStr);
+		data.map(v=>{
+			if(v.length != 0){
+				v.map(d=>{
+					d.show = false;
+				})
+			}
+
+		})
+		console.log(data);
+		let resData = {
+			status: succStatus,
+			data
+		}
+		res.json(resData);
+    },
     getGoodsDetail: async function (req, res) {
         let {
             g_id

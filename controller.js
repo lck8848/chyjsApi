@@ -74,6 +74,9 @@ const controller = {
         }
         let sql = `select id, alias_name, alias_code from alias where genre like '%${genre}%'`;
         let data = await query(sql);
+		data = data.filter(v => {
+			return ![1031, 1032, 1033, 1034, 1035].includes(v.alias_code);
+		});
         let resData = {
             status: succStatus,
             data: data

@@ -296,8 +296,9 @@ const controller = {
 	},
 	getOrderDetails: async function(req, res){
 		let { o_id } = req.query;
-		let sql = 'select id, user_id, goods_id, addr_id, spec_id, status, message, total_num, total_price from `order` where id = '+o_id;
+		let sql = 'select id, user_id, goods_id, addr_id, spec_id, status, message, total_num, total_price, orderNo, create_time from `order` where id = '+o_id;
 		let data = await query(sql);
+		data[0].create_time = moment(data[0].create_time).format('YYYY-MM-DD HH:mm:ss');
 		//根据获得的订单获取对应的商品，商家，用户地址
 		let sql2 = `select g.id, g.title, g.image_url, g.postage, s.spec_name, s.price, s.original, s2.nickname as shop_name from goods g
 			INNER JOIN spec s ON s.goods_id = g.id
@@ -331,6 +332,8 @@ const controller = {
 	},
 	wxlogin: async function(req, res){
 		let { code, userInfo } = req.body;
+		res.json({code, userInfo});
+		return;
 		let appid = 'wx39617bbe58d039fc';
 		let appSecret = '1d91825aacf2df83f733c9490b49d482'
 		let { data } = await axios.get(`https://api.weixin.qq.com/sns/jscode2session?appid=${appid}&secret=${appSecret}&js_code=${code}&grant_type=authorization_code`);
@@ -368,6 +371,18 @@ const controller = {
 		let data = await query(sql);
 		let resData = {};
 		resData.code = data.affectedRows > 0 ?succStatus :failStatus;
+		res.json(resData);
+	},
+	updateOrderStatus: async function(req, res){
+		let { oid, status } = req.body;
+		
+		let sql = 'update `order` set status = '+ status +` where id = ${oid}`;
+		let data = await query(sql);
+		let resData = {status: failStatus};
+		if(data.affectedRows > 0){
+			resData.status = succStatus;
+		}
+		
 		res.json(resData);
 	}
 };

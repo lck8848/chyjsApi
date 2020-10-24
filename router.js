@@ -54,6 +54,9 @@ route.post('/api/wxlogin', controller.wxlogin);
 
 route.post('/api/addAddr', controller.addAddr);
 
+//修改订单状态
+route.post('/api/updateOrderStatus', controller.updateOrderStatus);
+
 route.get('/api/getFakingData', controller.getFakingData);
 
 module.exports = route;

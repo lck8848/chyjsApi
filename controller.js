@@ -3,6 +3,7 @@ const fs = require('fs');
 const moment = require('moment');
 const query = require('./query.js');
 const { getToken, checkToken } = require('./util/token.js');
+const rp = require('request-promise');
 
 const succStatus = 0;
 const failStatus = 1;
@@ -46,6 +47,7 @@ const controller = {
             status: succStatus,
             data: data
         }
+        console.log(data);
         res.json(resData);
     },
     getClassify: async function (req, res) {
@@ -330,40 +332,6 @@ const controller = {
 		}
 		res.json(resData);
 	},
-	wxlogin: async function(req, res){
-		let { code, userInfo } = req.body;
-		res.json({code, userInfo});
-		return;
-		let appid = 'wx39617bbe58d039fc';
-		let appSecret = '1d91825aacf2df83f733c9490b49d482'
-		let { data } = await axios.get(`https://api.weixin.qq.com/sns/jscode2session?appid=${appid}&secret=${appSecret}&js_code=${code}&grant_type=authorization_code`);
-		let resData = {};
-		if(data.errcode){
-			resData.errmsg = data.errmsg;
-		}else {
-			let { openid, session_key } = data;
-			let token = getToken(data, 1);
-			let sql = `select id, addr_id, goods_ids, phone, photo, name, sex, birthday, area, wx_number, balance, selfdom from user where open_id = ${openid}`;
-			let user = await query(sql);
-			if(!user[0]){
-				let sql = `insert into user(photo, name, open_id) values('${userInfo.avatarUrl}', '${userInfo.nickName}', '${openid}')`;
-				let data = await query(sql);
-				if(data.affectedRows < 1) {
-					resData = {
-						code: failStatus,
-						msg: '错误'
-					}
-					res.json(resData);
-					return;
-				}
-				sql = `select id, addr_id, goods_ids, phone, photo, name, sex, birthday, area, wx_number, balance, selfdom from user where open_id = ${openid}`;
-				user = await query(sql);
-			}
-			resData.token = token;
-			resData.userInfo = user[0];
-		}
-		res.json(resData);
-	},
 	addAddr: async function(req, res){
 		let { addr } = req.body;
 		let sql = `insert into addr(user_id, nickname, phone, addr_area, addr_detail, addr_house) 
@@ -384,7 +352,57 @@ const controller = {
 		}
 		
 		res.json(resData);
+	},
+	wxlogin: async function(req, res){
+		let { code, userInfo } = req.body;
+		
+		try {
+		  const options = {
+			method: 'GET',
+			url: 'https://api.weixin.qq.com/sns/jscode2session',
+			qs: {
+			  grant_type: 'authorization_code',
+			  js_code: code,
+			  secret: "f643291d06c043d24130e1a08ad53015",
+			  appid: "wxff39aac2e9520f5a"
+			}
+		  };
+		  let sessionData = await rp(options);
+		  sessionData = JSON.parse(sessionData);
+		  if (!sessionData.openid) {
+			res.json({status:failStatus, message:"获取失败"});
+			return;
+		  }
+		  let token = getToken(sessionData, 1);
+		  let sql = `select id, addr_id, goods_ids, phone, photo, name, sex, birthday, area, wx_number, balance, selfdom from user where open_id = ${openid}`;
+		  let user = await query(sql);
+		  if(!user[0]){
+		  	let sql = `insert into user(photo, name, open_id) values('${userInfo.avatarUrl}', '${userInfo.nickName}', '${openid}')`;
+		  	let data = await query(sql);
+		  	if(data.affectedRows < 1) {
+		  		let = resData = {
+		  			code: failStatus,
+		  			msg: '错误'
+		  		}
+		  		res.json(resData);
+		  		return;
+		  	}
+		  	sql = `select id, addr_id, goods_ids, phone, photo, name, sex, birthday, area, wx_number, balance, selfdom from user where open_id = ${openid}`;
+		  	user = await query(sql);
+		  }
+		  
+		  let resData = {
+			token: token,
+			user: user[0];
+		  }
+			res.json(resData)
+
+		} catch (e) {
+			res.json({status: failStatus, e});
+		  return;
+		}
 	}
+
 };
 
 module.exports = controller;

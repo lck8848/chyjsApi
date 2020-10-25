@@ -404,8 +404,8 @@ const controller = {
 			qs: {
 			  grant_type: 'authorization_code',
 			  js_code: code,
-			  secret: "1d91825aacf2df83f733c9490b49d482",
-			  appid: "wx39617bbe58d039fc"
+			  secret: "f643291d06c043d24130e1a08ad53015",
+			  appid: "wxff39aac2e9520f5a"
 			}
 		  };
 		  let sessionData = await rp(options);
@@ -460,6 +460,12 @@ const controller = {
 		let {affectedRows} = await query(sql);
 		let resData = affectedRows > 0 ?{status: succStatus, message:'ok'} :{status: failStatus, message:'err'};
 		res.json(resData);
+	},
+	getAddr:async function(req,res){
+		let {user_id} = req.query;
+		let sql = `select id,nickname,phone,addr_area,addr_detail,addr_house from addr where user_id = '${user_id}'`;
+		let data = await query(sql);
+		res.json(data) 
 	}
 
 };

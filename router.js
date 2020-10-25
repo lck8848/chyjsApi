@@ -57,6 +57,8 @@ route.post('/api/wxlogin', controller.wxlogin);
 
 route.post('/api/addAddr', controller.addAddr);
 
+// 查看当前用户地址
+route.get('/api/getAddr',controller.getAddr)
 //修改订单状态
 route.post('/api/updateOrderStatus', controller.updateOrderStatus);
 

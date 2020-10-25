@@ -129,6 +129,13 @@ route.post('/api/getAddress', controller.getAddress);
 
 //管理员
 route.post('/api/getSellerByUsername', controller.getSellerByUsername);
+
+//订单信息
+route.post('/api/getOrderInfo', controller.getOrderInfo);
+
+//分类信息
+route.post('/api/getGoodsInfo', controller.getGoodsInfo);
+
 //管理员
 route.post('/api/getAdminByUsername', controller.getAdminByUsername);
 

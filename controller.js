@@ -47,7 +47,6 @@ const controller = {
             status: succStatus,
             data: data
         }
-        console.log(data);
         res.json(resData);
     },
     getClassify: async function (req, res) {

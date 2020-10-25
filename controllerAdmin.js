@@ -17,6 +17,58 @@ let del = {
     1: "已删除"
 }
 
+async function queryAddr(addr_id) {
+    let sql = `select * from addr where id = ${addr_id}`;
+    let res = await query(sql);
+    return res;
+};
+async function queryGoods(goods_id) {
+    let sql = `select * from goods where id = ${goods_id}`;
+    let res = await query(sql);
+    return res;
+};
+async function querySpec(spec_id) {
+    let sql = `select * from spec where id = ${spec_id}`;
+    let res = await query(sql);
+    return res;
+};
+async function querySeller(seller_id) {
+    let sql = `select * from seller where id = ${seller_id}`;
+    let res = await query(sql);
+    return res;
+};
+async function queryUser(user_id) {
+    let sql = `select * from user where id = ${user_id}`;
+    let res = await query(sql);
+    return res;
+};
+async function queryOrderInfo(orderInfo) {
+    let a_res = await queryAddr(orderInfo.addr_id);
+    let g_res = await queryGoods(orderInfo.goods_id);
+    let s1_res = await querySpec(orderInfo.spec_id);
+    let s2_res = await querySeller(orderInfo.seller_id);
+    let u_res = await queryUser(orderInfo.user_id);
+    return {
+        addr: a_res[0],
+        goods: g_res[0],
+        spec: s1_res[0],
+        seller: s2_res[0],
+        user: u_res[0],
+    }
+};
+async function queryAlias(alias_code) {
+    let a_res = [];
+    let sql = ""
+    alias_code.split(",").map((v,k)=>{
+        sql += "select * from `alias` where alias_code = '" + v + "'; ";
+    })
+    let res = await query(sql);
+    return [].concat(...res); 
+};
+async function queryGoodsInfo(alias_code) {
+    let a_res = await queryAlias(alias_code);
+    return a_res;
+};
 const controller = {
     getGoodsList: async function (req, res) {
         let sql = 'select * from `goods`';
@@ -69,12 +121,20 @@ const controller = {
             v.sold_status = sold[v.sold_status];
             v.is_delete = del[v.is_delete];
         })
-        let resData = {
-            code: 20000,
-            status: succStatus,
-            data: {
-                total: data.length,
-                items: data
+        let resData;
+        if (data.length >= 1) {
+            resData = {
+                code: 20000,
+                status: succStatus,
+                data: {
+                    total: data.length,
+                    items: data
+                }
+            }
+        } else {
+            resData = {
+                code: 10000,
+                status: failStatus
             }
         }
         res.json(resData);
@@ -240,7 +300,7 @@ const controller = {
             alias_name,
             genre
         } = req.body;
-        let sql = "UPDATE `alias` SET `alias_name`='"+alias_name+"',`genre`='"+genre+"' WHERE (`id`='"+id+"');";
+        let sql = "UPDATE `alias` SET `alias_name`='" + alias_name + "',`genre`='" + genre + "' WHERE (`id`='" + id + "');";
         let data = await query(sql);
         let resData;
         if (data.affectedRows == 1) {
@@ -264,7 +324,7 @@ const controller = {
             name,
             status
         } = req.body;
-        let sql = "UPDATE `user` SET `photo`='"+photo+"', `name`='"+name+"', `status`='"+status+"' WHERE (`id`='"+id+"');";
+        let sql = "UPDATE `user` SET `photo`='" + photo + "', `name`='" + name + "', `status`='" + status + "' WHERE (`id`='" + id + "');";
         let data = await query(sql);
         let resData;
         if (data.affectedRows == 1) {
@@ -288,7 +348,7 @@ const controller = {
             shop_img,
             is_delete
         } = req.body;
-        let sql = "UPDATE `seller` SET `nickname`='"+nickname+"', `shop_img`='"+shop_img+"', `is_delete`='"+is_delete+"' WHERE (`id`='"+id+"');";
+        let sql = "UPDATE `seller` SET `nickname`='" + nickname + "', `shop_img`='" + shop_img + "', `is_delete`='" + is_delete + "' WHERE (`id`='" + id + "');";
         let data = await query(sql);
         let resData;
         if (data.affectedRows == 1) {
@@ -595,6 +655,44 @@ const controller = {
         }
         res.json(resData);
     },
+    getGoodsInfo: async function (req, res) {
+        let {
+            aliasCodeArr
+        } = req.body;
+        let goodsArr = [];
+        aliasCodeArr.map(async (v, k) => {
+            let aliasInfo = await queryGoodsInfo(v);
+            goodsArr.push(aliasInfo)
+            if (k == aliasCodeArr.length - 1) {
+                // console.log(goodsArr);
+                let resData = {
+                    code: 20000,
+                    status: succStatus,
+                    data: goodsArr
+                }
+                res.json(resData);
+            }
+        })
+    },
+    getOrderInfo: async function (req, res) {
+        let {
+            orderInfoArr
+        } = req.body;
+        let orderArr = [];
+        orderInfoArr.map(async (v, k) => {
+            let orderInfo = await queryOrderInfo(v);
+            orderArr.push(orderInfo)
+            if (k == orderInfoArr.length - 1) {
+                // console.log(orderArr);
+                let resData = {
+                    code: 20000,
+                    status: succStatus,
+                    data: orderArr
+                }
+                res.json(resData);
+            }
+        })
+    },
     getUser: async function (req, res) {
         let {
             user_id
@@ -718,7 +816,7 @@ const controller = {
             alias_code,
             genre
         } = req.body;
-        let sql = "INSERT INTO `alias` (`alias_name`, `alias_code`, `genre`) VALUES ('"+alias_name+"', '"+alias_code+"', '"+genre+"');";
+        let sql = "INSERT INTO `alias` (`alias_name`, `alias_code`, `genre`) VALUES ('" + alias_name + "', '" + alias_code + "', '" + genre + "');";
         let data = await query(sql);
         let resData;
         if (data.affectedRows >= 1) {
@@ -742,7 +840,7 @@ const controller = {
             nickname,
             shop_img
         } = req.body;
-        let sql = "INSERT INTO `seller` (`username`, `password`, `nickname`, `shop_img`, `is_delete`) VALUES ('"+username+"', '"+password+"', '"+nickname+"', '"+shop_img+"', '0');";
+        let sql = "INSERT INTO `seller` (`username`, `password`, `nickname`, `shop_img`, `is_delete`) VALUES ('" + username + "', '" + password + "', '" + nickname + "', '" + shop_img + "', '0');";
 
         let data = await query(sql);
         let resData;
@@ -837,7 +935,7 @@ const controller = {
         let {
             seller_id
         } = req.body;
-        let sql = "UPDATE `seller` SET `is_delete`='1' WHERE (`id`='"+seller_id+"');";
+        let sql = "UPDATE `seller` SET `is_delete`='1' WHERE (`id`='" + seller_id + "');";
         let data = await query(sql);
         let resData;
         if (data.affectedRows == 1) {
@@ -859,8 +957,8 @@ const controller = {
             user_id,
             status
         } = req.body;
-        if(status == "") status = 2;
-        let sql = "UPDATE `user` SET `status`='"+status+"' WHERE (`id`='"+user_id+"');";
+        if (status == "") status = 2;
+        let sql = "UPDATE `user` SET `status`='" + status + "' WHERE (`id`='" + user_id + "');";
         let data = await query(sql);
         let resData;
         if (data.affectedRows == 1) {
@@ -1072,7 +1170,7 @@ const controller = {
             });
             return;
         }
-        let sql = `select * from seller where username = '${username}' and password = '${password}'`;
+        let sql = `select * from seller where username = '${username}' and password = '${password}' and is_delete = '0'`;
         let data = await query(sql);
 
         let resData = {

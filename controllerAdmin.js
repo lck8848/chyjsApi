@@ -487,12 +487,21 @@ const controller = {
             v.status == 4 && (v.status = "退款/售后");
             v.status == 5 && (v.status = "取消订单");
         })
-        let resData = {
-            code: 20000,
-            status: succStatus,
-            data: {
-                total: data.length,
-                items: data
+        
+        let resData;
+        if (data.length >= 1) {
+            resData = {
+                code: 20000,
+                status: succStatus,
+                data: {
+                    total: data.length,
+                    items: data
+                }
+            }
+        } else {
+            resData = {
+                code: 10000,
+                status: failStatus
             }
         }
         res.json(resData);
@@ -526,13 +535,6 @@ const controller = {
     getCarouselList: async function (req, res) {
         let sql = 'select * from `carousel`';
         let data = await query(sql);
-        data.map(v => {
-            v.status == 1 && (v.status = "待付款");
-            v.status == 2 && (v.status = "待收货");
-            v.status == 3 && (v.status = "待发货");
-            v.status == 4 && (v.status = "退款/售后");
-            v.status == 5 && (v.status = "取消订单");
-        })
         let resData = {
             code: 20000,
             status: succStatus,

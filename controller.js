@@ -403,8 +403,8 @@ const controller = {
 			qs: {
 			  grant_type: 'authorization_code',
 			  js_code: code,
-			  secret: "f643291d06c043d24130e1a08ad53015",
-			  appid: "wxff39aac2e9520f5a"
+			  secret: "1d91825aacf2df83f733c9490b49d482",
+			  appid: "wx39617bbe58d039fc"
 			}
 		  };
 		  let sessionData = await rp(options);
@@ -414,20 +414,13 @@ const controller = {
 			return;
 		  }
 		  let token = getToken(sessionData, 1);
-		  let sql = `select id, addr_id, goods_ids, phone, photo, name, sex, birthday, area, wx_number, balance, selfdom from user where open_id = ${openid}`;
+		  let sql = `select id,addr_id,goods_ids,phone,photo as img_url,name,sex,birthday,area,wx_number,balance,selfdom from user where open_id = '${sessionData.openid}'`;
 		  let user = await query(sql);
 		  if(!user[0]){
-		  	let sql = `insert into user(photo, name, open_id) values('${userInfo.avatarUrl}', '${userInfo.nickName}', '${openid}')`;
+		  	let sql = `insert into user(photo, name, open_id) values('${userInfo.avatarUrl}', '${userInfo.nickName}', '${sessionData.openid}')`;
 		  	let data = await query(sql);
-		  	if(data.affectedRows < 1) {
-		  		let = resData = {
-		  			code: failStatus,
-		  			msg: '错误'
-		  		}
-		  		res.json(resData);
-		  		return;
-		  	}
-		  	sql = `select id, addr_id, goods_ids, phone, photo, name, sex, birthday, area, wx_number, balance, selfdom from user where open_id = ${openid}`;
+			
+		  	sql = `select id, addr_id, goods_ids, phone, photo as img_url, name, sex, birthday, area, wx_number, balance, selfdom from user where open_id = ${sessionData.openid}`;
 		  	user = await query(sql);
 		  }
 		  
@@ -441,6 +434,31 @@ const controller = {
 			res.json({status: failStatus, e});
 		  return;
 		}
+	},
+	checkToken: function(req, res){
+		let { token } = req.query;
+		let code = checkToken(token);
+		if(!code){
+			let resData = {
+				status: failStatus,
+				message: "err"
+			}
+			res.json(resData);
+		}else {
+			let resData = {
+				status: succStatus,
+				message: "ok"
+			}
+			res.json(resData); 
+		}
+	},
+	updateUser: async function(req, res){
+		let { user } = req.body;
+		let objArr = Object.keys(user);
+		let sql = `update user set ${objArr[1]} = '${user[objArr[1]]}' where id = ${user.id}`;
+		let {affectedRows} = await query(sql);
+		let resData = affectedRows > 0 ?{status: succStatus, message:'ok'} :{status: failStatus, message:'err'};
+		res.json(resData);
 	}
 
 };

@@ -12,6 +12,7 @@ module.exports = {
 	checkToken: function(token){
 		try {
 		  let decoded = jwt.verify(token, secret);
+		  return decoded;
 		} catch(err) {
 			return false;
 		}

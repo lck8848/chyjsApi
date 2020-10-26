@@ -403,8 +403,8 @@ const controller = {
 			qs: {
 			  grant_type: 'authorization_code',
 			  js_code: code,
-			  secret: "f643291d06c043d24130e1a08ad53015",
-			  appid: "wxff39aac2e9520f5a"
+			  secret: "8492188a005d040fdeac5b94c2427e57",
+			  appid: "wx2d6417ea98ec2d7a"
 			}
 		  };
 		  let sessionData = await rp(options);

@@ -47,6 +47,7 @@ const controller = {
             status: succStatus,
             data: data
         }
+        console.log(data);
         res.json(resData);
     },
     getClassify: async function (req, res) {
@@ -377,8 +378,11 @@ const controller = {
 		let sql = `insert into addr(user_id, nickname, phone, addr_area, addr_detail, addr_house) 
 		values(${addr.user_id}, '${addr.nickname}', '${addr.phone}', '${addr.addr_area}', '${addr.addr_detail}', '${addr.addr_house}')`;
 		let data = await query(sql);
+		
+		console.log(data);
 		let resData = {};
 		resData.code = data.affectedRows > 0 ?succStatus :failStatus;
+		resData.addr_id = data.insertId;
 		res.json(resData);
 	},
 	updateOrderStatus: async function(req, res){
@@ -462,7 +466,7 @@ const controller = {
 	},
 	getAddr:async function(req,res){
 		let {user_id} = req.query;
-		let sql = `select id,nickname,phone,addr_area,addr_detail,addr_house from addr where user_id = '${user_id}'`;
+		let sql = `select id,nickname,phone,addr_area,addr_detail,addr_house from addr where user_id ='${user_id}'`;
 		let data = await query(sql);
 		res.json(data) 
 	}

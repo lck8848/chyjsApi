@@ -423,7 +423,7 @@ const controller = {
 		  	sql = `select id, addr_id, goods_ids, phone, photo as img_url, name, sex, birthday, area, wx_number, balance, selfdom from user where open_id = ${sessionData.openid}`;
 		  	user = await query(sql);
 		  }
-		  
+		  user[0].birthday = moment(user[0].birthday).format("YYYY-MM-DD")
 		  let resData = {
 			token: token,
 			user: user[0]

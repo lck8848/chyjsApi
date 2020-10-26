@@ -71,4 +71,8 @@ route.get('/api/getFakingData', controller.getFakingData);
 //修改用户属性
 route.post('/api/updateUser', controller.updateUser);
 
+route.post('/api/updateAddr', controller.updateAddr);
+
+route.get('/api/deleteAddr', controller.deleteAddr);
+
 module.exports = route;

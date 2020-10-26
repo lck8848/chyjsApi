@@ -47,6 +47,7 @@ const controller = {
             status: succStatus,
             data: data
         }
+        console.log(data);
         res.json(resData);
     },
     getClassify: async function (req, res) {
@@ -377,8 +378,11 @@ const controller = {
 		let sql = `insert into addr(user_id, nickname, phone, addr_area, addr_detail, addr_house) 
 		values(${addr.user_id}, '${addr.nickname}', '${addr.phone}', '${addr.addr_area}', '${addr.addr_detail}', '${addr.addr_house}')`;
 		let data = await query(sql);
+		
+		console.log(data);
 		let resData = {};
 		resData.code = data.affectedRows > 0 ?succStatus :failStatus;
+		resData.addr_id = data.insertId;
 		res.json(resData);
 	},
 	updateOrderStatus: async function(req, res){
@@ -403,8 +407,8 @@ const controller = {
 			qs: {
 			  grant_type: 'authorization_code',
 			  js_code: code,
-			  secret: "1d91825aacf2df83f733c9490b49d482",
-			  appid: "wx39617bbe58d039fc"
+			  secret: "8492188a005d040fdeac5b94c2427e57",
+			  appid: "wx2d6417ea98ec2d7a"
 			}
 		  };
 		  let sessionData = await rp(options);
@@ -459,6 +463,18 @@ const controller = {
 		let {affectedRows} = await query(sql);
 		let resData = affectedRows > 0 ?{status: succStatus, message:'ok'} :{status: failStatus, message:'err'};
 		res.json(resData);
+	},
+	getAddr:async function(req,res){
+		let {user_id} = req.query;
+		let sql = `select id,nickname,phone,addr_area,addr_detail,addr_house from addr where user_id ='${user_id}'`;
+		let data = await query(sql);
+		res.json(data) 
+	},
+	getOneAddr:async function(req,res){
+		let {id} = req.query;
+		let sql = `select id,nickname,phone,addr_area,addr_detail,addr_house from addr where id ='${id}'`
+		let data = await query(sql)
+		res.json(data[0])
 	}
 
 };

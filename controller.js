@@ -475,8 +475,15 @@ const controller = {
 		let sql = `select id,nickname,phone,addr_area,addr_detail,addr_house from addr where id ='${id}'`
 		let data = await query(sql)
 		res.json(data[0])
+	},
+	updateAddr: async function(req, res){
+		let {addr} = req.body;
+		let sql = `update addr set nickname = '${addr.nickname}', phone = '${addr.phone}', 
+		addr_area = '${addr.addr_area}', addr_detail = '${addr.addr_detail}', addr_house = '${addr.addr_house}' where id = ${addr.id}`;
+		let {affectedRows} = await query(sql);
+		let resData = affectedRows > 0 ?{status: succStatus, message:'ok'} :{status: failStatus, message:'err'};
+		res.json(resData);
 	}
-
 };
 
 module.exports = controller;

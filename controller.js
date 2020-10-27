@@ -47,7 +47,20 @@ const controller = {
             status: succStatus,
             data: data
         }
-        console.log(data);
+        // console.log(data);
+        res.json(resData);
+    },
+    getCartByUserId: async function (req, res) {
+        let {
+			user_id
+        } = req.body;
+        let sql = 'select * from `cart` where user_id = ' + user_id;
+        let data = await query(sql);
+        let resData = {
+            status: succStatus,
+            data: data
+        }
+        // console.log(data);
         res.json(resData);
     },
     getClassify: async function (req, res) {
@@ -379,7 +392,7 @@ const controller = {
 		values(${addr.user_id}, '${addr.nickname}', '${addr.phone}', '${addr.addr_area}', '${addr.addr_detail}', '${addr.addr_house}')`;
 		let data = await query(sql);
 		
-		console.log(data);
+		// console.log(data);
 		let resData = {};
 		resData.code = data.affectedRows > 0 ?succStatus :failStatus;
 		resData.addr_id = data.insertId;

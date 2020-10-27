@@ -1060,6 +1060,7 @@ const controller = {
             total_num,
             total_price,
             status,
+            
         } = req.body;
         let sql = "UPDATE `order` SET `user_id`='" + user_id + "', `seller_id`='" + seller_id + "', `goods_id`='" + goods_id + "', `addr_id`='" + addr_id + "', `spec_id`='" + spec_id + "', `status`='" + status + "', `message`='" + message + "', `total_num`='" + total_num + "', `total_price`='" + total_price + "' WHERE (`id`='" + id + "')";
         let data = await query(sql);

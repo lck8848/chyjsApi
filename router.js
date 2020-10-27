@@ -13,6 +13,9 @@ route.get('/api/getSearchResult', controller.getSearchResult);
 //获取礼物
 route.get('/api/getGift', controller.getGift);
 
+//获取购物车根据用户id
+route.post('/api/getCartByUserId', controller.getCartByUserId);
+
 //获取具体分类
 route.get('/api/getClassify', controller.getClassify);
 

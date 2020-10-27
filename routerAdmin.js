@@ -121,7 +121,7 @@ route.post('/api/delOrder', controller.delOrder);
 //添加订单 
 route.post('/api/addOrder', controller.addOrder);
 
-//添加订单 
+//修改订单 
 route.post('/api/updOrder', controller.updOrder);
 
 //地址列表

@@ -77,5 +77,6 @@ route.post('/api/updateUser', controller.updateUser);
 route.post('/api/updateAddr', controller.updateAddr);
 
 route.get('/api/deleteAddr', controller.deleteAddr);
+route.get('/api/deleteUser', controller.deleteUser);
 
 module.exports = route;

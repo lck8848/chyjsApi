@@ -60,8 +60,10 @@ route.post('/api/wxlogin', controller.wxlogin);
 
 route.post('/api/addAddr', controller.addAddr);
 
-// 查看当前用户地址
+// 查看当前用户的所有地址
 route.get('/api/getAddr',controller.getAddr)
+//查看指定地址
+route.get('/api/getOneAddr',controller.getOneAddr)
 //修改订单状态
 route.post('/api/updateOrderStatus', controller.updateOrderStatus);
 
@@ -71,5 +73,9 @@ route.get('/api/getFakingData', controller.getFakingData);
 
 //修改用户属性
 route.post('/api/updateUser', controller.updateUser);
+
+route.post('/api/updateAddr', controller.updateAddr);
+
+route.get('/api/deleteAddr', controller.deleteAddr);
 
 module.exports = route;

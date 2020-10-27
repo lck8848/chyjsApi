@@ -440,7 +440,7 @@ const controller = {
 		  	sql = `select id, addr_id, goods_ids, phone, photo as img_url, name, sex, birthday, area, wx_number, balance, selfdom from user where open_id = ${sessionData.openid}`;
 		  	user = await query(sql);
 		  }
-		  
+		  user[0].birthday = moment(user[0].birthday).format("YYYY-MM-DD")
 		  let resData = {
 			token: token,
 			user: user[0]
@@ -482,8 +482,28 @@ const controller = {
 		let sql = `select id,nickname,phone,addr_area,addr_detail,addr_house from addr where user_id ='${user_id}'`;
 		let data = await query(sql);
 		res.json(data) 
+	},
+	getOneAddr:async function(req,res){
+		let {id} = req.query;
+		let sql = `select id,nickname,phone,addr_area,addr_detail,addr_house from addr where id ='${id}'`
+		let data = await query(sql)
+		res.json(data[0])
+	},
+	updateAddr: async function(req, res){
+		let {addr} = req.body;
+		let sql = `update addr set nickname = '${addr.nickname}', phone = '${addr.phone}', 
+		addr_area = '${addr.addr_area}', addr_detail = '${addr.addr_detail}', addr_house = '${addr.addr_house}' where id = ${addr.id}`;
+		let {affectedRows} = await query(sql);
+		let resData = affectedRows > 0 ?{status: succStatus, message:'ok'} :{status: failStatus, message:'err'};
+		res.json(resData);
+	},
+	deleteAddr: async function(req, res){
+		let {id} = req.body;
+		let sql = `delete from addr where id = ${id}`;
+		let {affectedRows} = await query(sql);
+		let resData = affectedRows > 0 ?{status: succStatus, message:'ok'} :{status: failStatus, message:'err'};
+		res.json(resData);
 	}
-
 };
 
 module.exports = controller;

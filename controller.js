@@ -506,8 +506,8 @@ const controller = {
 	},
 	
 	deleteUser: async function(req, res){
-		let {id} = req.body;
-		let sql = `delete from addr where id = ${id}`;
+		let {id} = req.query;
+		let sql = `delete from user where id = ${id}`;
 		let {affectedRows} = await query(sql);
 		let resData = affectedRows > 0 ?{status: succStatus, message:'ok'} :{status: failStatus, message:'err'};
 		res.json(resData);

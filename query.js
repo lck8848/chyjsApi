@@ -13,13 +13,9 @@ connection.connect(() => {
 connection.on('error', function (err) {
     console.log('db error', err);
     // 如果是连接断开，自动重新连接
-    if (err.code === 'read ECONNRESET') {
-        connection.connect(() => {
-            console.log("数据库已连接");
-        });
-    } else {
-        throw err;
-    }
+    connection.connect(() => {
+        console.log("数据库已连接");
+    });
 });
 
 module.exports = function query(sql) {

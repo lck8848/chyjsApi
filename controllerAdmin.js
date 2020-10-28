@@ -18,42 +18,43 @@ let del = {
 }
 
 async function queryAddr(addr_id) {
-    let sql = `select * from addr where id = ${addr_id}`;
+    let sql = `select * from addr where id = ${addr_id} limit 1`;
     let res = await query(sql);
     return res;
 };
 async function queryGoods(goods_id) {
-    let sql = `select * from goods where id = ${goods_id}`;
+    let sql = `select * from goods where id = ${goods_id} limit 1`;
     let res = await query(sql);
     return res;
 };
 async function querySpec(spec_id) {
-    let sql = `select * from spec where id = ${spec_id}`;
+    let sql = `select * from spec where id = ${spec_id} limit 1`;
     let res = await query(sql);
     return res;
 };
 async function querySeller(seller_id) {
-    let sql = `select * from seller where id = ${seller_id}`;
+    let sql = `select * from seller where id = ${seller_id} limit 1`;
     let res = await query(sql);
     return res;
 };
 async function queryUser(user_id) {
-    let sql = `select * from user where id = ${user_id}`;
+    let sql = `select * from user where id = ${user_id} limit 1`;
     let res = await query(sql);
     return res;
 };
 async function queryOrderInfo(orderInfo) {
-    let a_res = await queryAddr(orderInfo.addr_id);
-    let g_res = await queryGoods(orderInfo.goods_id);
-    let s1_res = await querySpec(orderInfo.spec_id);
-    let s2_res = await querySeller(orderInfo.seller_id);
-    let u_res = await queryUser(orderInfo.user_id);
+    let a_res = queryAddr(orderInfo.addr_id);
+    let g_res = queryGoods(orderInfo.goods_id);
+    let s1_res = querySpec(orderInfo.spec_id);
+    let s2_res = querySeller(orderInfo.seller_id);
+    let u_res = queryUser(orderInfo.user_id);
+    let res = await Promise.all([a_res,g_res,s1_res,s2_res,u_res])
     return {
-        addr: a_res[0],
-        goods: g_res[0],
-        spec: s1_res[0],
-        seller: s2_res[0],
-        user: u_res[0],
+        addr: res[0][0],
+        goods: res[1][0],
+        spec: res[2][0],
+        seller: res[3][0],
+        user: res[4][0],
     }
 };
 async function queryAlias(alias_code) {
@@ -185,7 +186,7 @@ const controller = {
         let {
             spec_id
         } = req.body;
-        let sql = "select * from `spec` where id = '" + spec_id + "'; ";
+        let sql = "select * from `spec` where id = '" + spec_id + "' limit 1; ";
         let data = await query(sql);
         let resData;
         if (data.length >= 1) {
@@ -210,7 +211,7 @@ const controller = {
         let resData;
         let sqlStr = "";
         if (alias_id) {
-            sqlStr = "select * from `alias` where id = '" + alias_id + "';";
+            sqlStr = "select * from `alias` where id = '" + alias_id + "' limit 1;";
             let data = await query(sqlStr);
             if (data.length == 1) {
                 resData = {
@@ -416,7 +417,7 @@ const controller = {
         let {
             goods_id
         } = req.body;
-        let sql = 'select * from `goods` where id = ' + goods_id;
+        let sql = 'select * from `goods` where id = ' + goods_id +' limit 1;';
         let data = await query(sql);
         data.map(v => {
             v.sold_status = sold[v.sold_status];
@@ -666,7 +667,6 @@ const controller = {
             let aliasInfo = await queryGoodsInfo(v);
             goodsArr.push(aliasInfo)
             if (k == aliasCodeArr.length - 1) {
-                // console.log(goodsArr);
                 let resData = {
                     code: 20000,
                     status: succStatus,
@@ -685,7 +685,6 @@ const controller = {
             let orderInfo = await queryOrderInfo(v);
             orderArr.push(orderInfo)
             if (k == orderInfoArr.length - 1) {
-                // console.log(orderArr);
                 let resData = {
                     code: 20000,
                     status: succStatus,
@@ -699,7 +698,7 @@ const controller = {
         let {
             user_id
         } = req.body;
-        let sql = 'select * from `user` where id = ' + user_id;
+        let sql = 'select * from `user` where id = ' + user_id + ' limit 1;';
         let data = await query(sql);
         let resData;
         if (data.length == 1) {
@@ -720,7 +719,7 @@ const controller = {
         let {
             carousel_id
         } = req.body;
-        let sql = 'select * from `carousel` where id = ' + carousel_id;
+        let sql = 'select * from `carousel` where id = ' + carousel_id + ' limit 1;';
         let data = await query(sql);
         let resData;
         if (data.length == 1) {
@@ -741,7 +740,7 @@ const controller = {
         let {
             order_id
         } = req.body;
-        let sql = 'select * from `order` where id = ' + order_id;
+        let sql = 'select * from `order` where id = ' + order_id + ' limit 1;';
         let data = await query(sql);
         data.map(v => {
             v.status == 1 && (v.status = "待付款");
@@ -1088,7 +1087,7 @@ const controller = {
         if (u_id) {
             sql = `select * from addr where user_id = ${u_id}`;
         } else if (addr_id) {
-            sql = `select * from addr where id = ${addr_id}`;
+            sql = `select * from addr where id = ${addr_id} limit 1;`;
         }
         let data = await query(sql);
 
@@ -1186,7 +1185,7 @@ const controller = {
         res.sendFile(__dirname + req.query.url);
     },
     readImgAddr: async function (req, res) {
-        res.json("http://localhost:7001/api/uploads?url=" + req.query.url);
+        res.json("http://47.106.36.197:7001/api/uploads?url=" + req.query.url);
     },
     uploadFeature: async function (req, res) {
         if (req.file) {

@@ -504,10 +504,50 @@ const controller = {
 		let resData = affectedRows > 0 ?{status: succStatus, message:'ok'} :{status: failStatus, message:'err'};
 		res.json(resData);
 	},
-	
 	deleteUser: async function(req, res){
 		let {id} = req.query;
 		let sql = `delete from user where id = ${id}`;
+		let {affectedRows} = await query(sql);
+		let resData = affectedRows > 0 ?{status: succStatus, message:'ok'} :{status: failStatus, message:'err'};
+		res.json(resData);
+	},
+	getCartList: async function(req, res){
+		let {userId} = req.query;
+		let sql = `select c.id, c.goods_id, g.seller_id, g.image_url, g.title, g.spec_title, 
+		c.count, c.spec_id, c.checked, s.spec_name, s.price from cart c 
+		INNER JOIN goods g ON g.id = c.goods_id INNER JOIN spec s ON s.id = c.spec_id 
+		where user_id = ${userId}`;
+		let data = await query(sql);
+		data.map(v => {
+			v.spec = {
+				id: v.spec_id,
+				spec_name: v.spec_name,
+				price: v.price,
+			}
+			delete v.spec_id;
+			delete v.spec_name;
+			delete v.price;
+		})
+		let resData = {
+			status: succStatus,
+			data: data
+		}
+		res.json(resData);
+	},
+	getSpec: async function(req, res){
+		let { goodsId } = req.query;
+		let sql = `select id, spec_name, price, stock_num from spec where goods_id = ${goodsId}`;
+		let data = await query(sql);
+		let resData = {
+			status: succStatus,
+			data: data
+		}
+		res.json(resData);
+	},
+	updateCart: async function(req, res){
+		let { cart } = req.body;
+		let objArr = Object.keys(cart);
+		let sql = `update cart set ${objArr[1]} = '${cart[objArr[1]]}' where id = ${cart.id}`;
 		let {affectedRows} = await query(sql);
 		let resData = affectedRows > 0 ?{status: succStatus, message:'ok'} :{status: failStatus, message:'err'};
 		res.json(resData);

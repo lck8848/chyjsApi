@@ -79,4 +79,10 @@ route.post('/api/updateAddr', controller.updateAddr);
 route.get('/api/deleteAddr', controller.deleteAddr);
 route.get('/api/deleteUser', controller.deleteUser);
 
+route.get('/api/getCartList', controller.getCartList);
+
+route.get('/api/getSpec', controller.getSpec);
+
+route.post('/api/updateCart', controller.updateCart);
+
 module.exports = route;

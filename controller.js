@@ -504,6 +504,13 @@ const controller = {
 		let resData = affectedRows > 0 ?{status: succStatus, message:'ok'} :{status: failStatus, message:'err'};
 		res.json(resData);
 	},
+	deleteUser: async function(req, res){
+		let {id} = req.query;
+		let sql = `delete from user where id = ${id}`;
+		let {affectedRows} = await query(sql);
+		let resData = affectedRows > 0 ?{status: succStatus, message:'ok'} :{status: failStatus, message:'err'};
+		res.json(resData);
+	},
 	getCartList: async function(req, res){
 		let {userId} = req.query;
 		let sql = `select c.id, c.goods_id, g.seller_id, g.image_url, g.title, g.spec_title, 

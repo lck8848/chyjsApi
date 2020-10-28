@@ -543,7 +543,7 @@ const controller = {
 		res.json(resData);
 	},
 	delCart: async function(req, res){
-		let { ids } = req.query;
+		let { ids } = req.body;
 		let sql = `delete from cart where id in (ids)`;
 		let {affectedRows} = await query(sql);
 		let resData = affectedRows > 0 ?{status: succStatus, message:'ok'} :{status: failStatus, message:'err'};

@@ -549,6 +549,13 @@ const controller = {
 		let resData = affectedRows > 0 ?{status: succStatus, message:'ok'} :{status: failStatus, message:'err'};
 		res.json(resData);
 	},
+	updateAllCart: async function(req, res){
+		let { userId, checked } = req.body;
+		let sql = `update cart set checked = ${checked} where user_id = ${userId}`;
+		let {affectedRows} = await query(sql);
+		let resData = affectedRows > 0 ?{status: succStatus, message:'ok'} :{status: failStatus, message:'err'};
+		res.json(resData);
+	},
 	addCart: async function(req, res){
 		let { userId, goodsId, count, specId } = req.body;
 		let sql = `insert into cart(user_id, goods_id, count, spec_id) values(${userId}, ${goodsId}

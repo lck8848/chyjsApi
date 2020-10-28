@@ -84,4 +84,8 @@ route.get('/api/getSpec', controller.getSpec);
 
 route.post('/api/updateCart', controller.updateCart);
 
+route.get('/api/delCart', controller.delCart);
+
+route.post('/api/addCart', controller.addCart);
+
 module.exports = route;

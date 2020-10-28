@@ -511,16 +511,6 @@ const controller = {
 		INNER JOIN goods g ON g.id = c.goods_id INNER JOIN spec s ON s.id = c.spec_id 
 		where user_id = ${userId}`;
 		let data = await query(sql);
-		data.map(v => {
-			v.spec = {
-				id: v.spec_id,
-				spec_name: v.spec_name,
-				price: v.price,
-			}
-			delete v.spec_id;
-			delete v.spec_name;
-			delete v.price;
-		})
 		let resData = {
 			status: succStatus,
 			data: data
@@ -541,6 +531,21 @@ const controller = {
 		let { cart } = req.body;
 		let objArr = Object.keys(cart);
 		let sql = `update cart set ${objArr[1]} = '${cart[objArr[1]]}' where id = ${cart.id}`;
+		let {affectedRows} = await query(sql);
+		let resData = affectedRows > 0 ?{status: succStatus, message:'ok'} :{status: failStatus, message:'err'};
+		res.json(resData);
+	},
+	delCart: async function(req, res){
+		let { ids } = req.query;
+		let sql = `delete from cart where id in (ids)`;
+		let {affectedRows} = await query(sql);
+		let resData = affectedRows > 0 ?{status: succStatus, message:'ok'} :{status: failStatus, message:'err'};
+		res.json(resData);
+	},
+	addCart: async function(req, res){
+		let { userId, goodsId, count, specId } = req.body;
+		let sql = `insert into cart(user_id, goods_id, count, spec_id) values(${userId}, ${goodsId}
+		, ${count}, ${specId})`;
 		let {affectedRows} = await query(sql);
 		let resData = affectedRows > 0 ?{status: succStatus, message:'ok'} :{status: failStatus, message:'err'};
 		res.json(resData);

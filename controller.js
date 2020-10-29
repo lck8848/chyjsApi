@@ -558,7 +558,7 @@ const controller = {
 	},
 	addCart: async function(req, res){
 		let { userId, goodsId, sellerId, count, specId } = req.body;
-		let sql = `insert into cart(user_id, goods_id, seller_id count, spec_id) values(${userId}, ${goodsId}
+		let sql = `insert into cart(user_id, goods_id, seller_id, count, spec_id) values(${userId}, ${goodsId}
 		, ${sellerId}, ${count}, ${specId})`;
 		let {affectedRows} = await query(sql);
 		let resData = affectedRows > 0 ?{status: succStatus, message:'ok'} :{status: failStatus, message:'err'};

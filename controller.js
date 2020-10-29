@@ -47,7 +47,6 @@ const controller = {
             status: succStatus,
             data: data
         }
-        // console.log(data);
         res.json(resData);
     },
     getCartByUserId: async function (req, res) {
@@ -60,7 +59,6 @@ const controller = {
             status: succStatus,
             data: data
         }
-        // console.log(data);
         res.json(resData);
     },
     getClassify: async function (req, res) {
@@ -335,7 +333,7 @@ const controller = {
 		let isStatus = (['1', '2', '3', '4'].indexOf(status) !== -1);
 		//判断用户是否正在搜索
 		let isKeyword = keyword !== '-1';
-		let sql = 'SELECT o.id, o.status, o.total_num, o.total_price, s.nickname as shop_name, g.title, g.image_url, sp.spec_name, sp.price FROM `order` o ' +
+		let sql = 'SELECT o.id, o.status, o.total_num, o.total_price, s.nickname as shop_name, g.title, g.image_url, g.postage, sp.spec_name, sp.price FROM `order` o ' +
 			`INNER JOIN seller s on o.seller_id = s.id
 			INNER JOIN goods g ON o.goods_id = g.id
 			INNER JOIN spec sp ON o.spec_id = sp.id
@@ -392,7 +390,6 @@ const controller = {
 		values(${addr.user_id}, '${addr.nickname}', '${addr.phone}', '${addr.addr_area}', '${addr.addr_detail}', '${addr.addr_house}')`;
 		let data = await query(sql);
 		
-		// console.log(data);
 		let resData = {};
 		resData.code = data.affectedRows > 0 ?succStatus :failStatus;
 		resData.addr_id = data.insertId;
@@ -433,14 +430,26 @@ const controller = {
 		  let token = getToken(sessionData, 1);
 		  let sql = `select id,addr_id,goods_ids,phone,photo as img_url,name,sex,birthday,area,wx_number,balance,selfdom from user where open_id = '${sessionData.openid}'`;
 		  let user = await query(sql);
-		  if(!user[0]){
+		  if(user.length === 0){
 		  	let sql = `insert into user(photo, name, open_id) values('${userInfo.avatarUrl}', '${userInfo.nickName}', '${sessionData.openid}')`;
-		  	let data = await query(sql);
-			
-		  	sql = `select id, addr_id, goods_ids, phone, photo as img_url, name, sex, birthday, area, wx_number, balance, selfdom from user where open_id = ${sessionData.openid}`;
-		  	user = await query(sql);
+		  	let {insertId} = await query(sql);
+			user = [{
+				id: insertId,
+				addr_id: "",
+				goods_ids: "",
+				phone: "",
+				img_url: userInfo.avatarUrl,
+				name: userInfo.nickName,
+				sex: "保密",
+				birthday: "",
+				area: "",
+				wx_number: "",
+				balance: 0,
+				selfdom: 0
+			}]
+		  	// sql = `select id, addr_id, goods_ids, phone, photo as img_url, name, sex, birthday, area, wx_number, balance, selfdom from user where open_id = ${sessionData.openid}`;
+		  	// user = await query(sql);
 		  }
-		  user[0].birthday = moment(user[0].birthday).format("YYYY-MM-DD")
 		  let resData = {
 			token: token,
 			user: user[0]

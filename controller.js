@@ -557,9 +557,28 @@ const controller = {
 		res.json(resData);
 	},
 	addCart: async function(req, res){
-		let { userId, goodsId, count, specId } = req.body;
-		let sql = `insert into cart(user_id, goods_id, count, spec_id) values(${userId}, ${goodsId}
-		, ${count}, ${specId})`;
+		let { userId, goodsId, sellerId, count, specId } = req.body;
+		let sql = `insert into cart(user_id, goods_id, seller_id count, spec_id) values(${userId}, ${goodsId}
+		, ${sellerId}, ${count}, ${specId})`;
+		let {affectedRows} = await query(sql);
+		let resData = affectedRows > 0 ?{status: succStatus, message:'ok'} :{status: failStatus, message:'err'};
+		res.json(resData);
+	},
+	getSellerIdByGoodsIds: async function(req, res){
+		let { ids } = req.query;
+		let sql = `select seller_id from goods where id in (${ids})`;
+		let data = await query(sql);
+		let resData = {
+			status: succStatus,
+			data: data
+		}
+		res.json(resData);
+	},
+	addOrder: async function(req, res){
+		let { order } = req.body;
+		let sql = 'insert into `order`(seller_id, user_id, goods_id, addr_id, spec_id, message, total_num, total_price, orderNo)'+
+		`values(${order.seller_id}, ${order.user_id}, ${order.goods_id}, ${order.addr_id}, ${order.spec_id}, 
+		'${order.message}', ${order.total_num}, ${order.total_price}, '${order.orderNo}')`;
 		let {affectedRows} = await query(sql);
 		let resData = affectedRows > 0 ?{status: succStatus, message:'ok'} :{status: failStatus, message:'err'};
 		res.json(resData);

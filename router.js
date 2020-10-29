@@ -91,4 +91,8 @@ route.post('/api/addCart', controller.addCart);
 
 route.post('/api/updateAllCart', controller.updateAllCart);
 
+route.get('/api/getSellerIdByGoodsIds', controller.getSellerIdByGoodsIds);
+
+route.post('/api/addOrder', controller.addOrder);
+
 module.exports = route;

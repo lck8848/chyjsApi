@@ -200,6 +200,7 @@ const controller = {
 		let date = moment(goods.create_time).format('YYYY-MM-DD hh:mm:ss');
 		goods.create_time = new Date(date).getTime();
         goods.images = data[1];
+		goods.images.push({id: 0, img_url: "http://47.106.36.197:7000/source/goodsCover/Fi0_J4UluRNVQiwmeLskcYvfRMG1.jpg"})
 		goods.speclist = data[2];
 		let stock = 0;
 		// 计算总数量
@@ -333,15 +334,31 @@ const controller = {
 		let isStatus = (['1', '2', '3', '4'].indexOf(status) !== -1);
 		//判断用户是否正在搜索
 		let isKeyword = keyword !== '-1';
-		let sql = 'SELECT o.id, o.status, o.total_num, o.total_price, s.nickname as shop_name, g.title, g.image_url, g.postage, sp.spec_name, sp.price FROM `order` o ' +
-			`INNER JOIN seller s on o.seller_id = s.id
-			INNER JOIN goods g ON o.goods_id = g.id
-			INNER JOIN spec sp ON o.spec_id = sp.id
-			where o.user_id = ${u_id} ${isStatus ?'and o.status = '+status :''}
-			 ${isKeyword ?'and (g.title like "%'+keyword+'%" or s.nickname like "%'+keyword+'%")' :'' }
-			 order by o.create_time desc`;
-		
+		let sql = 'SELECT o.orderNo FROM `order` o ' +
+		`INNER JOIN seller s on o.seller_id = s.id
+		INNER JOIN goods g ON o.goods_id = g.id
+		where o.user_id = ${u_id} ${isStatus ?'and o.status = '+status :''}
+		${isKeyword ?'and (g.title like "%'+keyword+'%" or s.nickname like "%'+keyword+'%")' :'' }`;
 		let data = await query(sql);
+		let arr = data.map(v => v.orderNo);
+		arr = [...new Set(arr) ];
+		
+		let str = arr.join("','")
+		sql = 'SELECT o.id, o.status, o.total_num, o.total_price, o.orderNo, s.nickname as shop_name, g.title, g.image_url, g.postage, sp.spec_name, sp.price FROM `order` o ' +
+			`INNER JOIN seller s on o.seller_id = s.id 
+			INNER JOIN goods g ON o.goods_id = g.id 
+			INNER JOIN spec sp ON o.spec_id = sp.id 
+			where o.user_id = ${u_id} and o.orderNo in ('${str}') 
+			order by o.create_time desc`
+		// let sql = 'SELECT o.id, o.status, o.total_num, o.total_price, o.orderNo, s.nickname as shop_name, g.title, g.image_url, g.postage, sp.spec_name, sp.price FROM `order` o ' +
+		// 	`INNER JOIN seller s on o.seller_id = s.id
+		// 	INNER JOIN goods g ON o.goods_id = g.id
+		// 	INNER JOIN spec sp ON o.spec_id = sp.id
+		// 	where o.user_id = ${u_id} ${isStatus ?'and o.status = '+status :''}
+		// 	 ${isKeyword ?'and (g.title like "%'+keyword+'%" or s.nickname like "%'+keyword+'%")' :'' }
+		// 	 order by o.create_time desc`;
+		
+		data = await query(sql);
 		let resData = {
 		    status: succStatus,
 		    data: data
@@ -353,16 +370,10 @@ const controller = {
 		let sql = 'select id, user_id, goods_id, addr_id, spec_id, status, message, total_num, total_price, orderNo, create_time from `order` where id = '+o_id;
 		let data = await query(sql);
 		data[0].create_time = moment(data[0].create_time).format('YYYY-MM-DD HH:mm:ss');
-		//根据获得的订单获取对应的商品，商家，用户地址
-		let sql2 = `select g.id, g.title, g.image_url, g.postage, s.spec_name, s.price, s.original, s2.nickname as shop_name from goods g
-			INNER JOIN spec s ON s.goods_id = g.id
-			INNER JOIN seller s2 ON s2.id = g.seller_id
-			where s.id = ${data[0].spec_id} and g.id = ${data[0].goods_id}`;
-		let sql3 = `select nickname, phone, addr_area, addr_detail, addr_house from addr where id = ${data[0].addr_id}`;
-		let sqlArr = [query(sql2), query(sql3)];
-		let data2 = await Promise.all(sqlArr);
-		data[0].goods = data2[0][0];
-		data[0].addr = data2[1][0];
+		//根据获得的订单获取对应的商家，用户地址
+		let sql2 = `select nickname, phone, addr_area, addr_detail, addr_house from addr where id = ${data[0].addr_id}`;
+		let data2 = await query(sql2);
+		data[0].addr = data2[0];
 		let resData = {
 		    status: succStatus,
 		    data: data[0]
@@ -396,9 +407,9 @@ const controller = {
 		res.json(resData);
 	},
 	updateOrderStatus: async function(req, res){
-		let { oid, status } = req.body;
+		let { oids, status } = req.body;
 		
-		let sql = 'update `order` set status = '+ status +` where id = ${oid}`;
+		let sql = 'update `order` set status = '+ status +` where id in (${oids})`;
 		let data = await query(sql);
 		let resData = {status: failStatus};
 		if(data.affectedRows > 0){

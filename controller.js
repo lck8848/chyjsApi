@@ -307,8 +307,8 @@ const controller = {
 		let sql = `select id, image_url, title, price, original, discount, activ_end_time, sell_point from goods where sold_status = ${status} limit ${(page-1)*pageSize}, ${pageSize}`;
 		let data = await query(sql);
 		data.map( v => {
-			let date = moment(v.create_time).format('YYYY-MM-DD hh:mm:ss');
-			v.create_time = new Date(date).getTime();
+			let date = moment(v.activ_end_time).format('YYYY-MM-DD hh:mm:ss');
+			v.activ_end_time = new Date(date).getTime();
 		});
 		let resData = {
 		    status: succStatus,

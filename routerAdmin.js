@@ -119,7 +119,7 @@ route.post('/api/delSeller', controller.delSeller);
 route.post('/api/delOrder', controller.delOrder);
 
 //添加订单 
-route.post('/api/addOrder', controller.addOrder);
+route.post('/api/addOrderInfo', controller.addOrderInfo);
 
 //修改订单 
 route.post('/api/updOrder', controller.updOrder);

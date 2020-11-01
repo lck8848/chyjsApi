@@ -16,6 +16,13 @@ let del = {
     0: "未删除",
     1: "已删除"
 }
+let orderStatus = {
+    待付款: 1,
+    待收货: 2,
+    待发货: 3,
+    "退款/售后": 4,
+    取消订单: 5,
+  }
 
 async function queryAddr(addr_id) {
     let sql = `select * from addr where id = ${addr_id} limit 1`;
@@ -457,8 +464,8 @@ const controller = {
             is_delete
         } = req.body;
         let sql = "UPDATE `goods` SET `seller_id`='" + seller_id + "', `price`='" + price + "', `original`=" + original + ", `alias`='" + alias + "', `image_url`='" + image_url + "', `discount`='" + discount + "', `sold_status`='" + sold_status + "', `title`='" + title + "', `details`='" + details + "', `postage`='" + postage + "', `spec_title`='" + spec_title + "', `total_sold_num`='" + total_sold_num + "', ";
-        if (activ_end_time == "null" || activ_end_time == "Invalid date") {
-            sql += "`activ_end_time`=null, `is_delete`='" + is_delete + "' WHERE (`id`='" + id + "');";
+        if (activ_end_time == null || activ_end_time == "Invalid date") {
+            sql += "`is_delete`='" + is_delete + "' WHERE (`id`='" + id + "');";
         } else {
             sql += "`activ_end_time`='" + activ_end_time + "', `is_delete`='" + is_delete + "' WHERE (`id`='" + id + "');";
         }
@@ -662,37 +669,36 @@ const controller = {
         let {
             aliasCodeArr
         } = req.body;
-        let goodsArr = [];
-        aliasCodeArr.map(async (v, k) => {
-            let aliasInfo = await queryGoodsInfo(v);
-            goodsArr.push(aliasInfo)
-            if (k == aliasCodeArr.length - 1) {
-                let resData = {
-                    code: 20000,
-                    status: succStatus,
-                    data: goodsArr
-                }
-                res.json(resData);
-            }
+        let pa = [];
+        aliasCodeArr.map((v, k) => {
+            pa.push(queryGoodsInfo(v));
         })
+        let g_res = await Promise.all(pa);
+        // let orderInfo = await ;
+        let resData = {
+            code: 20000,
+            status: succStatus,
+            data: g_res
+        }
+        res.json(resData);
     },
     getOrderInfo: async function (req, res) {
         let {
             orderInfoArr
         } = req.body;
-        let orderArr = [];
-        orderInfoArr.map(async (v, k) => {
-            let orderInfo = await queryOrderInfo(v);
-            orderArr.push(orderInfo)
-            if (k == orderInfoArr.length - 1) {
-                let resData = {
-                    code: 20000,
-                    status: succStatus,
-                    data: orderArr
-                }
-                res.json(resData);
-            }
+        let pa = [];
+        orderInfoArr.map((v, k) => {
+            pa.push(queryOrderInfo(v));
         })
+        let o_res = await Promise.all(pa);
+        // let orderInfo = await ;
+        o_res = [].concat(...o_res); 
+        let resData = {
+            code: 20000,
+            status: succStatus,
+            data: o_res
+        }
+        res.json(resData);
     },
     getUser: async function (req, res) {
         let {
@@ -1018,7 +1024,7 @@ const controller = {
 
         res.json(resData);
     },
-    addOrder: async function (req, res) {
+    addOrderInfo: async function (req, res) {
         let {
             user_id,
             seller_id,
@@ -1061,6 +1067,10 @@ const controller = {
             status,
             
         } = req.body;
+
+        if(isNaN(status)){
+            status = orderStatus[status];
+        }
         let sql = "UPDATE `order` SET `user_id`='" + user_id + "', `seller_id`='" + seller_id + "', `goods_id`='" + goods_id + "', `addr_id`='" + addr_id + "', `spec_id`='" + spec_id + "', `status`='" + status + "', `message`='" + message + "', `total_num`='" + total_num + "', `total_price`='" + total_price + "' WHERE (`id`='" + id + "')";
         let data = await query(sql);
         let resData;
